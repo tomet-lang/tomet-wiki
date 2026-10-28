@@ -1,0 +1,26 @@
+- Keystatic, TinaCMS, Sveltia CMS, Decap CMS, StaticShield, Gollum Wiki.js, VitePress
+
+=[Git-backend]
+
+- 履歴、権限などを委託する。
+- tomet-cmsを使用する。
+
+=[tomet-shelfと比較]
+
+- tomet-shelf-headlessの機能を活用する
+  - テーマなどは輸入せず、Wikiに合わせたシンプルなテーマを独自に作成する。
+- tomet-wiki自体もheadlessとして切り出し、カスタマイズ可能性を担保する
+- テーマ、プラグインなどの拡張機能を作らない。
+  - 作りたい場合は新たにバイナリを作成してほしい。
+  - 今後、それらの機能を追加したものが登場するかもしれない。
+- 編集機能、Github連携など
+
+=[tometを使用するメリット]
+
+- 非常に高速
+- コンフリクト状態を保持、遅延解決 -> これをwikiで許容するかは別の話。
+- これで、ウェブでの公開、編集が可能になる。
+
+==[他アプリの対応をまたない理由]
+
+-
