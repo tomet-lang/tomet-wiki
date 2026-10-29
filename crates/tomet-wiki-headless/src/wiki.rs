@@ -150,10 +150,19 @@ pub fn build_wiki(
     skip_search: bool,
 ) -> Result<BuildReport> {
     info!(
-        "Building wiki from {} to {}",
+        "Building wiki from {} to {} (production: {})",
         src_dir.display(),
-        out_dir.display()
+        out_dir.display(),
+        config.production
     );
+
+    if config.production
+        && (config.cms.owner.trim().is_empty() || config.cms.repo.trim().is_empty())
+    {
+        anyhow::bail!(
+            "Production mode (--production) requires non-empty [cms] 'owner' and 'repo' in wiki.toml"
+        );
+    }
 
     // 1. Scan vault
     let scanned: ScannedVault = scan_vault(src_dir, config).context("Failed to scan vault")?;

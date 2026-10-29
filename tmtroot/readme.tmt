@@ -23,8 +23,8 @@ Wiki system for the Tomet ecosystem.
 
 ```bash
 tomet-wiki init [dir] [--title <title>] [--owner <owner>] [--repo <repo>]
-tomet-wiki build [dir] [-d/--dest <dest>] [--strict]
-tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>]
+tomet-wiki build [dir] [-d/--dest <dest>] [--strict] [--production]
+tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>] [--production]
 ```
 
 ==[ Configuration (`wiki.toml`) ]
@@ -41,7 +41,8 @@ dest = "dist"
 owner = "my-org"
 repo = "my-wiki"
 branch = "main"
-auth_endpoint = "https://auth.example.com/oauth"
+path_prefix = "docs"
+auth_endpoint = "https://auth.tomet.dev/github"
 
 [build]
 url_prefix = "/wiki"

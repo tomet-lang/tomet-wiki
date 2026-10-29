@@ -23,8 +23,16 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Build { dir, dest, strict } => {
-            let (src_dir, out_dir, config) = resolve_build_paths(&dir, dest)?;
+        Commands::Build {
+            dir,
+            dest,
+            strict,
+            production,
+        } => {
+            let (src_dir, out_dir, mut config) = resolve_build_paths(&dir, dest)?;
+            if production {
+                config.production = true;
+            }
 
             let report = build_wiki(&src_dir, &out_dir, &config, &ASSETS, false)?;
 
@@ -43,8 +51,12 @@ async fn main() -> Result<()> {
             dest,
             host,
             port,
+            production,
         } => {
-            let (src_dir, out_dir, config) = resolve_build_paths(&dir, dest)?;
+            let (src_dir, out_dir, mut config) = resolve_build_paths(&dir, dest)?;
+            if production {
+                config.production = true;
+            }
 
             run_dev_server(
                 src_dir,

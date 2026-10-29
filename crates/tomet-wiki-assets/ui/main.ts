@@ -10,9 +10,11 @@ export interface EditorOptions {
     owner?: string;
     repo?: string;
     branch?: string;
+    pathPrefix?: string;
     authEndpoint?: string;
     siteDomain?: string;
     apiBaseUrl?: string;
+    production?: boolean;
   };
 }
 

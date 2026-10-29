@@ -207,6 +207,7 @@ pub struct WikiDevHandler {
     renderer_factory: Arc<dyn RendererFactory>,
     excludes: RwLock<Vec<String>>,
     state: Arc<RwLock<Option<DevVaultState>>>,
+    production: bool,
 }
 
 impl WikiDevHandler {
@@ -217,6 +218,7 @@ impl WikiDevHandler {
         renderer_factory: Arc<dyn RendererFactory>,
     ) -> Self {
         let excludes = exclude_prefixes(&config);
+        let production = config.production;
         Self {
             src_dir,
             out_dir,
@@ -224,6 +226,7 @@ impl WikiDevHandler {
             renderer_factory,
             excludes: RwLock::new(excludes),
             state: Arc::new(RwLock::new(None)),
+            production,
         }
     }
 
@@ -234,8 +237,11 @@ impl WikiDevHandler {
     pub fn full_rebuild(&self) -> bool {
         let start = Instant::now();
         let reloaded_config = match WikiConfig::load_from_dir(&self.src_dir) {
-            Ok(cfg) => {
+            Ok(mut cfg) => {
                 info!("⚙️ Reloaded configuration from {}", self.src_dir.display());
+                if self.production {
+                    cfg.production = true;
+                }
                 let mut cfg_lock = self.config.write().unwrap();
                 *cfg_lock = cfg.clone();
                 let mut exc_lock = self.excludes.write().unwrap();

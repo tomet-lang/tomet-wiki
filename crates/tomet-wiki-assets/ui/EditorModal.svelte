@@ -4,6 +4,7 @@
   import {
     fetchFileFromGitHub,
     saveFileViaCms,
+    resolveRepoPath,
     listConflicts,
     type ConflictInfo,
   } from "./cms.ts";
@@ -24,9 +25,11 @@
       owner?: string;
       repo?: string;
       branch?: string;
+      pathPrefix?: string;
       authEndpoint?: string;
       siteDomain?: string;
       apiBaseUrl?: string;
+      production?: boolean;
     };
     onClose: () => void;
   } = $props();
@@ -34,6 +37,11 @@
   const owner = $derived(config.owner || "owner");
   const repo = $derived(config.repo || "repo");
   const branch = $derived(config.branch || "main");
+  const pathPrefix = $derived(config.pathPrefix || "");
+  const isProduction = $derived(config.production ?? false);
+  const isCmsConfigured = $derived(
+    Boolean(config.owner && config.owner !== "owner" && config.repo && config.repo !== "repo"),
+  );
   const apiBaseUrl = $derived(config.apiBaseUrl || "https://api.github.com");
   const authEndpoint = $derived(config.authEndpoint || "");
 
@@ -82,10 +90,18 @@
     errorMessage = null;
 
     try {
+      if (!isCmsConfigured) {
+        // CMS owner/repo not configured - use initialContent from page
+        originalRemoteContent = initialContent;
+        content = draft || initialContent;
+        return;
+      }
+
+      const fullPath = resolveRepoPath(relPath, pathPrefix);
       const remote = await fetchFileFromGitHub(
         owner,
         repo,
-        relPath,
+        fullPath,
         branch,
         authStore.token,
         apiBaseUrl,
@@ -107,6 +123,8 @@
       errorMessage = `Failed to load file: ${err.message}`;
       if (draft) {
         content = draft;
+      } else if (initialContent) {
+        content = initialContent;
       }
     } finally {
       isLoading = false;
@@ -121,6 +139,11 @@
   }
 
   async function handleCommit() {
+    if (!isProduction) {
+      errorMessage = "Commits are disabled in development mode. Run with '--production' to enable repository commits.";
+      return;
+    }
+
     if (!authStore.token) {
       activeTab = "auth";
       return;
@@ -132,10 +155,11 @@
     successMessage = null;
 
     try {
+      const fullPath = resolveRepoPath(relPath, pathPrefix);
       const result = await saveFileViaCms(
         owner,
         repo,
-        relPath,
+        fullPath,
         branch,
         content,
         message,
@@ -212,6 +236,9 @@
       <span class="tmt-doc-icon">📄</span>
       <span class="tmt-doc-path" title={relPath}>{relPath}</span>
       <span class="tmt-branch-pill">{branch}</span>
+      {#if !isProduction}
+        <span class="tmt-readonly-pill" title="Commits disabled in development mode. Pass --production to enable.">Read-Only</span>
+      {/if}
 
       {#if isDirty}
         <span class="tmt-status-badge tmt-status-dirty">● Unsaved</span>
@@ -266,10 +293,11 @@
       <button
         type="button"
         class="tmt-action-btn tmt-commit-btn"
-        disabled={isSaving || !authStore.token}
+        disabled={isSaving || !authStore.token || !isProduction}
         onclick={handleCommit}
+        title={!isProduction ? "Commits disabled in development mode (requires --production)" : "Commit changes to GitHub"}
       >
-        {isSaving ? "Saving..." : "Commit"}
+        {isSaving ? "Saving..." : !isProduction ? "Read-Only" : "Commit"}
       </button>
 
       <!-- Auth avatar / login trigger -->
@@ -457,6 +485,16 @@
     border-radius: 9999px;
     font-size: 0.75rem;
     color: var(--tmt-fg-muted, #656d76);
+  }
+
+  .tmt-readonly-pill {
+    padding: 0.15rem 0.45rem;
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    color: #b45309;
+    font-weight: 500;
   }
 
   .tmt-status-badge {

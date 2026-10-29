@@ -25,6 +25,10 @@ pub enum Commands {
         /// Fail the build if any document could not be rendered
         #[arg(long)]
         strict: bool,
+
+        /// Enable production mode (enables repository commits and enforces owner/repo config)
+        #[arg(long)]
+        production: bool,
     },
 
     /// Run the local development server with LiveReload
@@ -45,6 +49,10 @@ pub enum Commands {
         /// Port to bind the server on
         #[arg(short, long, default_value_t = 3000)]
         port: u16,
+
+        /// Enable production mode (enables repository commits and enforces owner/repo config)
+        #[arg(long)]
+        production: bool,
     },
 
     /// Initialize a new wiki.toml configuration in the directory

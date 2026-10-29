@@ -1,0 +1,15 @@
+[wiki]
+title = "Tomet Wiki"
+lang = "ja"
+
+[cms]
+owner = "tomet-lang"
+repo = "tomet-wiki"
+branch = "main"
+path_prefix = "tmtroot"
+
+[build]
+url_prefix = "/wiki"
+exclude = [
+  "crates"
+]

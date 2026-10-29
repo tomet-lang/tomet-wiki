@@ -44,6 +44,13 @@ export function resolveConflict(content: string, index: number, side: "a" | "b")
   return rawResolveConflict(content, index, side);
 }
 
+export function resolveRepoPath(relPath: string, pathPrefix?: string): string {
+  const cleanRel = relPath.replace(/^\/+/, "");
+  if (!pathPrefix) return cleanRel;
+  const cleanPrefix = pathPrefix.replace(/^\/+|\/+$/g, "");
+  return cleanPrefix ? `${cleanPrefix}/${cleanRel}` : cleanRel;
+}
+
 export async function fetchFileFromGitHub(
   owner: string,
   repo: string,

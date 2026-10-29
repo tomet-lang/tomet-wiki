@@ -17,6 +17,9 @@ pub struct WikiConfig {
     pub build: WikiBuildConfig,
     #[serde(default)]
     pub ui: WikiUiConfig,
+    /// Whether production mode is enabled (enables repository commits)
+    #[serde(default)]
+    pub production: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -78,6 +81,8 @@ pub struct CmsConfig {
     #[serde(default = "default_auth_endpoint")]
     pub auth_endpoint: Option<String>,
     #[serde(default)]
+    pub path_prefix: Option<String>,
+    #[serde(default)]
     pub site_domain: Option<String>,
     #[serde(default)]
     pub api_base_url: Option<String>,
@@ -100,6 +105,7 @@ impl Default for CmsConfig {
             repo: String::new(),
             branch: default_branch(),
             auth_endpoint: default_auth_endpoint(),
+            path_prefix: None,
             site_domain: None,
             api_base_url: None,
         }
@@ -115,9 +121,12 @@ struct CmsClientConfig<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     auth_endpoint: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    path_prefix: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     site_domain: Option<&'a str>,
     #[serde(skip_serializing_if = "Option::is_none")]
     api_base_url: Option<&'a str>,
+    production: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -320,8 +329,10 @@ impl WikiConfig {
             repo: &self.cms.repo,
             branch: &self.cms.branch,
             auth_endpoint,
+            path_prefix: self.cms.path_prefix.as_deref(),
             site_domain: self.cms.site_domain.as_deref(),
             api_base_url: self.cms.api_base_url.as_deref(),
+            production: self.production,
         };
         serde_json::to_string(&client).unwrap_or_else(|_| "{}".to_string())
     }
@@ -416,21 +427,25 @@ search = "Search articles"
         let mut config = WikiConfig::default();
         config.cms.owner = "my-org".to_string();
         config.cms.repo = "my-wiki".to_string();
-        config.cms.branch = "main".to_string();
+        config.cms.path_prefix = Some("tmtroot".to_string());
         config.cms.auth_endpoint = Some("https://auth.example.com".to_string());
+        config.production = true;
 
         let json = config.cms_client_config_json();
         assert!(json.contains(r#""owner":"my-org""#));
         assert!(json.contains(r#""repo":"my-wiki""#));
         assert!(json.contains(r#""branch":"main""#));
+        assert!(json.contains(r#""pathPrefix":"tmtroot""#));
+        assert!(json.contains(r#""production":true"#));
         assert!(json.contains(r#""authEndpoint":"https://auth.example.com""#));
         // None fields are omitted
         assert!(!json.contains("siteDomain"));
         assert!(!json.contains("apiBaseUrl"));
 
-        // Default config automatically has default authEndpoint
+        // Default config automatically has default authEndpoint and production: false
         let default_json = WikiConfig::default().cms_client_config_json();
         assert!(default_json.contains(r#""authEndpoint":"https://auth.tomet.dev/github""#));
+        assert!(default_json.contains(r#""production":false"#));
     }
 
     #[test]
