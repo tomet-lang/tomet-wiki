@@ -33,6 +33,7 @@ tomet = { git = "https://github.com/tomet-lang/tomet.git", features = [
 
 #= Crates.io
 anyhow = "1"
+askama = { version = "0.16", features = ["serde_json"] }
 clap = { version = "4.6", features = ["derive"] }
 notify = "6.1"
 pagefind = { version = "1.5", default-features = false }

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}404 Not Found | {{ site_title }}{% endblock %}
+
+{% block content %}
+<div class="tmt-wiki-container">
+  <main class="tmt-wiki-main tmt-wiki-404">
+    <h1 class="tmt-404-title">404</h1>
+    <p class="tmt-404-message">The page you were looking for could not be found.</p>
+    {% if !missing_path.is_empty() %}
+    <p class="tmt-404-path"><code>{{ missing_path }}</code></p>
+    {% endif %}
+    <div class="tmt-404-actions">
+      <a href="{{ home_url }}" class="tmt-wiki-btn tmt-wiki-btn-primary">Return to Home</a>
+    </div>
+  </main>
+</div>
+{% endblock %}

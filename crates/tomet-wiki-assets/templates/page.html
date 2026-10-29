@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ doc.title }} | {{ site_title }}{% endblock %}
+
+{% block header_actions %}
+<button type="button" class="tmt-wiki-btn tmt-wiki-btn-primary" id="tmt-wiki-edit-btn" data-rel-path="{{ doc.rel_path }}" title="Edit this page">
+  <svg class="tmt-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+  <span>Edit</span>
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="tmt-wiki-container">
+  <main data-pagefind-body data-tmt-rel-path="{{ doc.rel_path }}" class="tmt-wiki-main">
+    {% if !doc.slug.is_empty() %}
+    <span class="sr-only" data-pagefind-meta="path" data-pagefind-weight="10.0">{{ doc.slug }}</span>
+    {% endif %}
+    {% if !doc.rel_path.is_empty() && doc.rel_path != doc.slug %}
+    <span class="sr-only" data-pagefind-weight="10.0">{{ doc.rel_path }}</span>
+    {% endif %}
+
+    <header class="tmt-page-header">
+      {% if let Some(icon_html) = icon_rendered %}
+      <div class="tmt-page-icon">{{ icon_html|safe }}</div>
+      {% endif %}
+      <h1 class="tmt-page-title">{{ doc.title }}</h1>
+    </header>
+
+    {% if !doc.toc.is_empty() %}
+    <details class="tmt-wiki-toc">
+      <summary>Table of Contents</summary>
+      <ul>
+        {% for item in doc.toc %}
+        <li class="tmt-toc-item tmt-toc-level-{{ item.level }}">
+          <a href="#{{ item.id }}">{{ item.text }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+
+    <article class="tmt-wiki-article">
+      {{ doc.body_html|safe }}
+    </article>
+
+    {% if !backlinks.is_empty() %}
+    <section class="tmt-wiki-backlinks" aria-label="Linked references">
+      <h2 class="tmt-backlinks-heading">Linked References</h2>
+      <ul class="tmt-backlinks-list">
+        {% for bl in backlinks %}
+        <li class="tmt-backlink-item">
+          <a href="{{ bl.url }}" class="tmt-backlink-link">{{ bl.title }}</a>
+          {% if let Some(sec) = bl.section %}
+          <span class="tmt-backlink-sec">{{ sec }}</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

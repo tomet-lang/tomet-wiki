@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}All Pages | {{ site_title }}{% endblock %}
+
+{% block content %}
+<div class="tmt-wiki-container">
+  <main class="tmt-wiki-main">
+    <header class="tmt-page-header">
+      <h1 class="tmt-page-title">All Pages</h1>
+      <p class="tmt-page-subtitle">{{ entries.len() }} document(s) in wiki</p>
+    </header>
+
+    {% if !sections.is_empty() %}
+    <div class="tmt-sections-overview">
+      {% for sec in sections %}
+      <span class="tmt-section-badge">{{ sec.name }} ({{ sec.count }})</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="tmt-all-pages-list">
+      <ul>
+        {% for entry in entries %}
+        <li class="tmt-entry-item">
+          <a href="{{ entry.url }}" class="tmt-entry-link">{{ entry.title }}</a>
+          {% if let Some(sec) = entry.section %}
+          <span class="tmt-entry-sec">{{ sec }}</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </main>
+</div>
+{% endblock %}

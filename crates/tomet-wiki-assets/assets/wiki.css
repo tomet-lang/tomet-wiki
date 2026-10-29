@@ -1,0 +1,566 @@
+/* ==========================================================================
+   Tomet Wiki Theme CSS
+   Clean, non-linear reading experience with dark/light mode & conflict styling
+   ========================================================================== */
+
+:root {
+  --tmt-bg: #ffffff;
+  --tmt-bg-subtle: #f8fafc;
+  --tmt-bg-code: #f1f5f9;
+  --tmt-fg: #0f172a;
+  --tmt-fg-muted: #64748b;
+  --tmt-border: #e2e8f0;
+  --tmt-primary: #2563eb;
+  --tmt-primary-hover: #1d4ed8;
+  --tmt-primary-fg: #ffffff;
+  --tmt-accent: #f1f5f9;
+  --tmt-conflict-border: #f59e0b;
+  --tmt-conflict-bg: rgba(245, 158, 11, 0.05);
+  --tmt-conflict-label: #d97706;
+  --tmt-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tmt-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --tmt-max-width: 860px;
+  --tmt-header-height: 56px;
+}
+
+[data-theme="dark"] {
+  --tmt-bg: #090d16;
+  --tmt-bg-subtle: #111827;
+  --tmt-bg-code: #1e293b;
+  --tmt-fg: #f3f4f6;
+  --tmt-fg-muted: #9ca3af;
+  --tmt-border: #1f2937;
+  --tmt-primary: #3b82f6;
+  --tmt-primary-hover: #60a5fa;
+  --tmt-primary-fg: #ffffff;
+  --tmt-accent: #1e293b;
+  --tmt-conflict-border: #fbbf24;
+  --tmt-conflict-bg: rgba(245, 158, 11, 0.12);
+  --tmt-conflict-label: #f59e0b;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--tmt-bg);
+  color: var(--tmt-fg);
+  font-family: var(--tmt-font-sans);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Header & Navigation (No Left Sidebar!)
+   ========================================================================== */
+
+.tmt-wiki-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--tmt-header-height);
+  background: var(--tmt-bg);
+  background: color-mix(in srgb, var(--tmt-bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--tmt-border);
+}
+
+.tmt-wiki-header-inner {
+  max-width: var(--tmt-max-width);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tmt-wiki-brand {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tmt-fg);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tmt-wiki-brand:hover {
+  color: var(--tmt-primary);
+}
+
+.tmt-wiki-header-search {
+  flex: 1;
+  max-width: 320px;
+}
+
+.tmt-wiki-search-btn {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--tmt-border);
+  border-radius: 6px;
+  background: var(--tmt-bg-subtle);
+  color: var(--tmt-fg-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.tmt-wiki-search-btn:hover {
+  border-color: var(--tmt-primary);
+  color: var(--tmt-fg);
+}
+
+.tmt-search-placeholder {
+  flex: 1;
+  text-align: left;
+}
+
+.tmt-search-kbd {
+  font-size: 0.75rem;
+  font-family: var(--tmt-font-mono);
+  background: var(--tmt-bg);
+  border: 1px solid var(--tmt-border);
+  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+}
+
+.tmt-wiki-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tmt-wiki-btn {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--tmt-border);
+  border-radius: 6px;
+  background: var(--tmt-bg);
+  color: var(--tmt-fg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.tmt-wiki-btn:hover {
+  background: var(--tmt-bg-subtle);
+  border-color: var(--tmt-primary);
+}
+
+.tmt-wiki-btn-primary {
+  background: var(--tmt-primary);
+  color: var(--tmt-primary-fg);
+  border-color: var(--tmt-primary);
+}
+
+.tmt-wiki-btn-primary:hover {
+  background: var(--tmt-primary-hover);
+  border-color: var(--tmt-primary-hover);
+}
+
+.tmt-wiki-theme-toggle {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tmt-border);
+  border-radius: 6px;
+  background: var(--tmt-bg);
+  color: var(--tmt-fg);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.tmt-wiki-theme-toggle:hover {
+  border-color: var(--tmt-primary);
+}
+
+[data-theme="dark"] .tmt-icon-sun { display: inline-block; }
+[data-theme="dark"] .tmt-icon-moon { display: none; }
+[data-theme="light"] .tmt-icon-sun { display: none; }
+[data-theme="light"] .tmt-icon-moon { display: inline-block; }
+
+/* ==========================================================================
+   Main Content Layout (Single-column centered, non-linear reading)
+   ========================================================================== */
+
+.tmt-wiki-container {
+  max-width: var(--tmt-max-width);
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 5rem;
+  flex: 1;
+}
+
+.tmt-wiki-main {
+  width: 100%;
+}
+
+.tmt-page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--tmt-border);
+}
+
+.tmt-page-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.tmt-page-subtitle {
+  color: var(--tmt-fg-muted);
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0;
+}
+
+.tmt-page-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ==========================================================================
+   Article Typography & Prose
+   ========================================================================== */
+
+.tmt-wiki-article {
+  font-size: 1.0625rem;
+}
+
+.tmt-wiki-article h1,
+.tmt-wiki-article h2,
+.tmt-wiki-article h3,
+.tmt-wiki-article h4 {
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.tmt-wiki-article h2 {
+  font-size: 1.5rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--tmt-border);
+}
+
+.tmt-wiki-article h3 {
+  font-size: 1.25rem;
+}
+
+.tmt-wiki-article p {
+  margin: 1.25rem 0;
+}
+
+.tmt-wiki-article a {
+  color: var(--tmt-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tmt-wiki-article a:hover {
+  color: var(--tmt-primary-hover);
+}
+
+.tmt-wiki-article code {
+  font-family: var(--tmt-font-mono);
+  font-size: 0.875em;
+  background: var(--tmt-bg-code);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+}
+
+.tmt-wiki-article pre {
+  background: var(--tmt-bg-code);
+  border: 1px solid var(--tmt-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--tmt-font-mono);
+  font-size: 0.9rem;
+}
+
+.tmt-wiki-article pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tmt-wiki-article blockquote {
+  border-left: 4px solid var(--tmt-primary);
+  padding: 0.5rem 0 0.5rem 1rem;
+  margin: 1.5rem 0;
+  color: var(--tmt-fg-muted);
+  background: var(--tmt-bg-subtle);
+  border-radius: 0 6px 6px 0;
+}
+
+.tmt-wiki-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.tmt-wiki-article th,
+.tmt-wiki-article td {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--tmt-border);
+  text-align: left;
+}
+
+.tmt-wiki-article th {
+  background: var(--tmt-bg-subtle);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Conflict Directive (.tm-conflict) Styling
+   ========================================================================== */
+
+.tm-conflict {
+  border: 2px dashed var(--tmt-conflict-border);
+  border-radius: 8px;
+  margin: 1.75rem 0;
+  background: var(--tmt-conflict-bg);
+  overflow: hidden;
+}
+
+.tm-conflict-a,
+.tm-conflict-b {
+  padding: 1rem 1.25rem;
+}
+
+.tm-conflict-a {
+  border-bottom: 1px dashed var(--tmt-conflict-border);
+}
+
+.tm-conflict-a::before {
+  content: "⚠️ Conflict (Version A - Current / Base)";
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tmt-conflict-label);
+  margin-bottom: 0.5rem;
+}
+
+.tm-conflict-b::before {
+  content: "⚡ Conflict (Version B - Incoming / Remote)";
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tmt-conflict-label);
+  margin-bottom: 0.5rem;
+}
+
+/* Inline conflict fallback */
+span.tm-conflict {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   Table of Contents (In-page collapsible)
+   ========================================================================== */
+
+.tmt-wiki-toc {
+  background: var(--tmt-bg-subtle);
+  border: 1px solid var(--tmt-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 1.5rem 0;
+}
+
+.tmt-wiki-toc summary {
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tmt-wiki-toc ul {
+  list-style: none;
+  padding-left: 0.5rem;
+  margin: 0.5rem 0 0;
+}
+
+.tmt-toc-item {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.tmt-toc-level-3 {
+  padding-left: 1rem;
+}
+
+.tmt-toc-level-4 {
+  padding-left: 2rem;
+}
+
+/* ==========================================================================
+   Backlinks (Linked References)
+   ========================================================================== */
+
+.tmt-wiki-backlinks {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--tmt-border);
+}
+
+.tmt-backlinks-heading {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tmt-fg-muted);
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tmt-backlinks-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tmt-backlink-item {
+  background: var(--tmt-bg-subtle);
+  border: 1px solid var(--tmt-border);
+  border-radius: 6px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.tmt-backlink-link {
+  color: var(--tmt-fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tmt-backlink-link:hover {
+  color: var(--tmt-primary);
+}
+
+.tmt-backlink-sec {
+  font-size: 0.75rem;
+  color: var(--tmt-fg-muted);
+  background: var(--tmt-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--tmt-border);
+}
+
+/* ==========================================================================
+   All Pages Catalog & 404
+   ========================================================================== */
+
+.tmt-sections-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tmt-section-badge {
+  font-size: 0.8rem;
+  background: var(--tmt-bg-subtle);
+  border: 1px solid var(--tmt-border);
+  border-radius: 12px;
+  padding: 0.2rem 0.6rem;
+  color: var(--tmt-fg-muted);
+}
+
+.tmt-all-pages-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tmt-entry-item {
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--tmt-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tmt-entry-link {
+  color: var(--tmt-fg);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.tmt-entry-link:hover {
+  color: var(--tmt-primary);
+}
+
+.tmt-entry-sec {
+  font-size: 0.8rem;
+  color: var(--tmt-fg-muted);
+}
+
+.tmt-wiki-404 {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.tmt-404-title {
+  font-size: 5rem;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1;
+  color: var(--tmt-primary);
+}
+
+.tmt-404-message {
+  font-size: 1.25rem;
+  color: var(--tmt-fg-muted);
+  margin: 1rem 0 2rem;
+}
+
+/* ==========================================================================
+   Accessibility Utilities
+   ========================================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

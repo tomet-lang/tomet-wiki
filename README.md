@@ -45,6 +45,15 @@ exclude = [
 - `crates/tomet-wiki-assets` (`tomet-wiki-assets`) -- Wiki viewing theme and asset bundle.
 - `app` (`tomet-wiki`) -- Main CLI binary (`build`, `serve`, `init`).
 
+## Theme & Reading Experience
+
+`tomet-wiki-assets` provides an Askama-based theme tailored specifically for wikis and digital gardens:
+
+- Single-Column Focused Reading: Eliminates book-style sidebar hierarchies and linear previous/next pagination in favor of organic graph navigation.
+- First-Class Backlinks: Automatic presentation of incoming references at the footer of each document.
+- Inline Conflict Visualization: Dedicated presentation for `.tm-conflict` blocks, clearly distinguishing local and remote versions with badge indicators.
+- Editor & CMS Integration: Injects `data-tmt-rel-path`, `window.tmtWikiCms`, and the `#tmt-wiki-editor-root` container for Svelte editor components.
+
 ## Building and Testing
 
 ### Build workspace
