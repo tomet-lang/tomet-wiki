@@ -11,5 +11,10 @@ name = "tomet-wiki"
 path = "src/main.rs"
 
 [dependencies]
-clap = { workspace = true }
+tomet-wiki-headless.workspace = true
+tomet-wiki-assets.workspace = true
+clap = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

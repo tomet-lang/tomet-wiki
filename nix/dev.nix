@@ -25,6 +25,7 @@ mkShell {
     twrit
     catasto
     just
+    pagefind
 
     #= Build
     pkg-config

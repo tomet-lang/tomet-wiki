@@ -1,0 +1,13 @@
+[package]
+name = "tomet-wiki-assets"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tomet-wiki-headless.workspace = true
+tomet-shelf-config.workspace = true
+tomet-shelf-icons.workspace = true
+
+anyhow.workspace = true

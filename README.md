@@ -6,17 +6,44 @@ Wiki system for the Tomet ecosystem.
 
 ## Overview
 
-`tomet-wiki` is a Wiki engine designed for Tomet documents.
+`tomet-wiki` is a Wiki engine and static site generator designed for Tomet documents, featuring inline editing support with conflict resolution and Git CMS integration.
 
 ## Usage
 
 ```bash
-tomet-wiki [path]              # open wiki for path (defaults to ".")
+tomet-wiki init [dir] [--title <title>] [--owner <owner>] [--repo <repo>]
+tomet-wiki build [dir] [-d/--dest <dest>] [--strict]
+tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>]
+```
+
+## Configuration (`wiki.toml`)
+
+A `wiki.toml` configuration file in the vault root controls site generation and CMS authentication:
+
+```toml
+[wiki]
+title = "My Wiki"
+lang = "ja"
+dest = "dist"
+
+[cms]
+owner = "my-org"
+repo = "my-wiki"
+branch = "main"
+auth_endpoint = "https://auth.example.com/oauth"
+
+[build]
+url_prefix = "/wiki"
+exclude = [
+  "00-09 System/01 Apps"
+]
 ```
 
 ## Workspace Layout
 
-- `app` (`tomet-wiki`) -- Main CLI binary.
+- `crates/tomet-wiki-headless` (`tomet-wiki-headless`) -- Headless Wiki engine composing `tomet-shelf-*` component crates. Owns `WikiConfig`, `build_wiki`, and `WikiDevHandler`.
+- `crates/tomet-wiki-assets` (`tomet-wiki-assets`) -- Wiki viewing theme and asset bundle.
+- `app` (`tomet-wiki`) -- Main CLI binary (`build`, `serve`, `init`).
 
 ## Building and Testing
 

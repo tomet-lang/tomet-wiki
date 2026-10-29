@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["app"]
+members = ["app", "crates/*"]
 
 default-members = ["app"]
 
@@ -11,9 +11,40 @@ rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
+#= Internal
+tomet-wiki-headless = { path = "crates/tomet-wiki-headless" }
+tomet-wiki-assets = { path = "crates/tomet-wiki-assets" }
+
+#= Tomet Shelf
+tomet-shelf-config = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-document = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-icons = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-render = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-route = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-search = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-serve = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+
+#= Tomet
+tomet = { git = "https://github.com/tomet-lang/tomet.git", features = [
+  "html",
+  "links",
+  "parser",
+] }
+
 #= Crates.io
 anyhow = "1"
 clap = { version = "4.6", features = ["derive"] }
+notify = "6.1"
+pagefind = { version = "1.5", default-features = false }
+percent-encoding = "2.3"
+rayon = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+tokio = { version = "1.42", features = ["full"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+walkdir = "2.5"
 
 [profile.release]
 opt-level = 3
