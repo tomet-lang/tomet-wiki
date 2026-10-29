@@ -174,7 +174,6 @@
   }
 
   async function handleOAuthLogin() {
-    if (!authEndpoint) return;
     try {
       await authStore.loginWithOAuth(authEndpoint, config.siteDomain);
       activeTab = "editor";
@@ -353,39 +352,39 @@
               Continue Editing
             </button>
           {:else}
-            {#if authEndpoint}
-              <button
-                type="button"
-                class="tmt-btn tmt-oauth-btn"
-                onclick={handleOAuthLogin}
-                disabled={authStore.loading}
-              >
-                Sign in with GitHub (OAuth)
-              </button>
-              <div class="tmt-auth-divider"><span>OR</span></div>
-            {/if}
+            <button
+              type="button"
+              class="tmt-btn tmt-oauth-btn"
+              onclick={handleOAuthLogin}
+              disabled={authStore.loading}
+            >
+              Log in
+            </button>
 
-            <div class="tmt-pat-form">
-              <label for="tmt-pat-input">Personal Access Token (PAT)</label>
-              <input
-                id="tmt-pat-input"
-                type="password"
-                placeholder="ghp_... or github_pat_..."
-                class="tmt-input"
-                bind:value={patInput}
-              />
-              <span class="tmt-hint">
-                Requires repository content write permissions.
-              </span>
-              <button
-                type="button"
-                class="tmt-btn tmt-btn-primary"
-                onclick={handlePatLogin}
-                disabled={authStore.loading || !patInput.trim()}
-              >
-                {authStore.loading ? "Authenticating..." : "Save Token & Continue"}
-              </button>
-            </div>
+            <details class="tmt-pat-details">
+              <summary class="tmt-pat-summary">Advanced: Use Personal Access Token (PAT)</summary>
+              <div class="tmt-pat-form">
+                <label for="tmt-pat-input">Personal Access Token (PAT)</label>
+                <input
+                  id="tmt-pat-input"
+                  type="password"
+                  placeholder="ghp_... or github_pat_..."
+                  class="tmt-input"
+                  bind:value={patInput}
+                />
+                <span class="tmt-hint">
+                  Requires repository content write permissions.
+                </span>
+                <button
+                  type="button"
+                  class="tmt-btn tmt-btn-primary"
+                  onclick={handlePatLogin}
+                  disabled={authStore.loading || !patInput.trim()}
+                >
+                  {authStore.loading ? "Authenticating..." : "Save Token & Continue"}
+                </button>
+              </div>
+            </details>
           {/if}
         </div>
       </div>
@@ -688,21 +687,22 @@
     margin-bottom: 1rem;
   }
 
-  .tmt-auth-divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 1.25rem 0;
+  .tmt-pat-details {
+    margin-top: 1rem;
+    border-top: 1px solid var(--tmt-border, #d0d7de);
+    padding-top: 0.75rem;
   }
-  .tmt-auth-divider::before, .tmt-auth-divider::after {
-    content: "";
-    flex: 1;
-    border-bottom: 1px solid var(--tmt-border, #d0d7de);
-  }
-  .tmt-auth-divider span {
-    padding: 0 0.75rem;
+
+  .tmt-pat-summary {
+    font-size: 0.8rem;
     color: var(--tmt-fg-muted, #656d76);
-    font-size: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 0.75rem;
+  }
+
+  .tmt-pat-summary:hover {
+    color: var(--tmt-fg, #1f2328);
   }
 
   .tmt-pat-form label {

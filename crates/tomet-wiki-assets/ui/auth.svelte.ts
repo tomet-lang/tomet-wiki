@@ -13,6 +13,14 @@ class AuthStore {
   constructor() {
     if (typeof window !== "undefined") {
       this.token = localStorage.getItem("tmt_github_token");
+      const cached = localStorage.getItem("tmt_github_user");
+      if (cached) {
+        try {
+          this.user = JSON.parse(cached);
+        } catch {
+          // ignore
+        }
+      }
       if (this.token) {
         this.verifyToken(this.token).catch(() => {
           this.logout();
@@ -43,6 +51,15 @@ class AuthStore {
       this.token = token;
       this.user = user;
       localStorage.setItem("tmt_github_token", token);
+      localStorage.setItem("tmt_github_user", JSON.stringify(user));
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-auth", "true");
+        window.dispatchEvent(
+          new CustomEvent("tmt:auth:change", {
+            detail: { token, user, authenticated: true },
+          }),
+        );
+      }
       return user;
     } catch (err: any) {
       this.error = err.message || "Failed to verify GitHub token";
@@ -66,13 +83,19 @@ class AuthStore {
     }
   }
 
-  loginWithOAuth(authEndpoint: string, siteDomain?: string): Promise<string> {
+  loginWithOAuth(authEndpoint?: string, siteDomain?: string): Promise<string> {
     return new Promise((resolve, reject) => {
       this.loading = true;
       this.error = null;
 
-      const domain = siteDomain || window.location.hostname;
-      const url = `${authEndpoint}?site_id=${encodeURIComponent(domain)}`;
+      const endpoint =
+        authEndpoint ||
+        (typeof window !== "undefined" && (window as any).tmtWikiCms?.authEndpoint) ||
+        "https://auth.tomet.dev/github";
+      const domain =
+        siteDomain ||
+        (typeof window !== "undefined" ? window.location.hostname : "");
+      const url = `${endpoint}?site_id=${encodeURIComponent(domain)}`;
       const width = 600;
       const height = 700;
       const left = window.screenX + (window.outerWidth - width) / 2;
@@ -170,6 +193,13 @@ class AuthStore {
     this.error = null;
     if (typeof window !== "undefined") {
       localStorage.removeItem("tmt_github_token");
+      localStorage.removeItem("tmt_github_user");
+      document.documentElement.removeAttribute("data-auth");
+      window.dispatchEvent(
+        new CustomEvent("tmt:auth:change", {
+          detail: { token: null, user: null, authenticated: false },
+        }),
+      );
     }
   }
 }

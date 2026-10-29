@@ -77,6 +77,9 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
     assert!(html.contains(r#"data-rel-path="guides/getting-started.tmt""#), "Edit button must have rel_path");
     assert!(html.contains(r#"id="tmt-wiki-new-btn""#), "Must have new page button");
     assert!(html.contains(r#"id="tmt-wiki-search-trigger""#), "Must have search trigger");
+    assert!(html.contains(r#"id="tmt-wiki-auth-container""#), "Must have auth container");
+    assert!(html.contains(r#"id="tmt-wiki-login-btn""#), "Must have login button");
+    assert!(html.contains("tmt-auth-only"), "Must have tmt-auth-only gated buttons");
 
     // 4. Main container with data-tmt-rel-path
     assert!(html.contains(r#"data-tmt-rel-path="guides/getting-started.tmt""#));
@@ -92,8 +95,14 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
     assert!(html.contains("Local edits"));
     assert!(html.contains("Remote edits"));
 
-    // 7. Client config injected
-    assert!(html.contains("window.tmtWikiCms = {\"owner\":\"acme\",\"repo\":\"wiki\",\"branch\":\"main\"}"));
+    // 7. Client config injected with default auth endpoint
+    assert!(
+        html.contains(r#""authEndpoint":"https://auth.tomet.dev/github""#),
+        "window.tmtWikiCms must default authEndpoint to https://auth.tomet.dev/github"
+    );
+    assert!(html.contains(r#""owner":"acme""#));
+    assert!(html.contains(r#""repo":"wiki""#));
+    assert!(html.contains(r#""branch":"main""#));
 
     // 8. Editor assets linked and present
     assert!(html.contains("wiki-editor.css"));

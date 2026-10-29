@@ -178,6 +178,132 @@ body {
   border-color: var(--tmt-primary-hover);
 }
 
+/* ==========================================================================
+   Auth Gated Actions & Header User Menu
+   ========================================================================== */
+
+.tmt-auth-only {
+  display: none !important;
+}
+
+[data-auth="true"] .tmt-auth-only {
+  display: inline-flex !important;
+}
+
+.tmt-wiki-auth {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tmt-wiki-user-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tmt-wiki-avatar-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 0;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.tmt-wiki-avatar-btn:hover,
+.tmt-wiki-avatar-btn:focus-visible {
+  border-color: var(--tmt-primary);
+  outline: none;
+}
+
+.tmt-wiki-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.tmt-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 190px;
+  background: var(--tmt-bg);
+  border: 1px solid var(--tmt-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 0.5rem 0;
+  z-index: 50;
+  display: none;
+}
+
+.tmt-user-dropdown:not([hidden]) {
+  display: block;
+}
+
+.tmt-user-dropdown-header {
+  padding: 0.35rem 0.85rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.tmt-user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tmt-fg);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tmt-user-handle {
+  font-size: 0.75rem;
+  color: var(--tmt-fg-muted);
+  margin-top: 0.125rem;
+}
+
+.tmt-user-dropdown-divider {
+  height: 1px;
+  background: var(--tmt-border);
+  margin: 0.35rem 0;
+}
+
+.tmt-user-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--tmt-fg);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tmt-user-dropdown-item:hover,
+.tmt-user-dropdown-item:focus-visible {
+  background: var(--tmt-bg-subtle);
+  outline: none;
+}
+
+.tmt-logout-btn:hover,
+.tmt-logout-btn:focus-visible {
+  color: #ef4444;
+}
+
 .tmt-wiki-theme-toggle {
   width: 34px;
   height: 34px;

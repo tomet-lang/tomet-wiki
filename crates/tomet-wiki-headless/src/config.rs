@@ -61,6 +61,12 @@ impl WikiMeta {
     }
 }
 
+pub const DEFAULT_AUTH_ENDPOINT: &str = "https://auth.tomet.dev/github";
+
+fn default_auth_endpoint() -> Option<String> {
+    Some(CmsConfig::default_auth_endpoint())
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CmsConfig {
     #[serde(default)]
@@ -69,7 +75,7 @@ pub struct CmsConfig {
     pub repo: String,
     #[serde(default = "default_branch")]
     pub branch: String,
-    #[serde(default)]
+    #[serde(default = "default_auth_endpoint")]
     pub auth_endpoint: Option<String>,
     #[serde(default)]
     pub site_domain: Option<String>,
@@ -81,13 +87,19 @@ fn default_branch() -> String {
     "main".to_string()
 }
 
+impl CmsConfig {
+    pub fn default_auth_endpoint() -> String {
+        DEFAULT_AUTH_ENDPOINT.to_string()
+    }
+}
+
 impl Default for CmsConfig {
     fn default() -> Self {
         Self {
             owner: String::new(),
             repo: String::new(),
             branch: default_branch(),
-            auth_endpoint: None,
+            auth_endpoint: default_auth_endpoint(),
             site_domain: None,
             api_base_url: None,
         }
@@ -298,11 +310,16 @@ impl WikiConfig {
 
     /// Serializes the public CMS settings for injection into HTML pages as `window.tmtWikiCms`.
     pub fn cms_client_config_json(&self) -> String {
+        let auth_endpoint = self
+            .cms
+            .auth_endpoint
+            .as_deref()
+            .or(Some(DEFAULT_AUTH_ENDPOINT));
         let client = CmsClientConfig {
             owner: &self.cms.owner,
             repo: &self.cms.repo,
             branch: &self.cms.branch,
-            auth_endpoint: self.cms.auth_endpoint.as_deref(),
+            auth_endpoint,
             site_domain: self.cms.site_domain.as_deref(),
             api_base_url: self.cms.api_base_url.as_deref(),
         };
@@ -323,6 +340,10 @@ mod tests {
         assert_eq!(config.cms.branch, "main");
         assert_eq!(config.cms.owner, "");
         assert_eq!(config.cms.repo, "");
+        assert_eq!(
+            config.cms.auth_endpoint.as_deref(),
+            Some(DEFAULT_AUTH_ENDPOINT)
+        );
         assert_eq!(config.build.url_prefix, "/wiki");
         assert_eq!(config.build.asset_prefix, "/vault");
         assert!(!config.wiki.is_english());
@@ -406,6 +427,10 @@ search = "Search articles"
         // None fields are omitted
         assert!(!json.contains("siteDomain"));
         assert!(!json.contains("apiBaseUrl"));
+
+        // Default config automatically has default authEndpoint
+        let default_json = WikiConfig::default().cms_client_config_json();
+        assert!(default_json.contains(r#""authEndpoint":"https://auth.tomet.dev/github""#));
     }
 
     #[test]
