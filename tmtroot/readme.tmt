@@ -73,6 +73,13 @@ exclude = [
 just build
 ```
 
+=== Build Svelte 5 editor bundle
+
+```bash
+just editor        # compile Svelte 5 editor island via Deno into assets/
+just editor-check  # verify assets are up to date with sources
+```
+
 === Run tests
 
 ```bash

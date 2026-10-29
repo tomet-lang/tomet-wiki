@@ -26,6 +26,7 @@ mkShell {
     catasto
     just
     pagefind
+    deno
 
     #= Build
     pkg-config

@@ -9,6 +9,7 @@ package/
 result
 result-*
 target/
+node_modules/
 
 #= Develop
 .direnv/

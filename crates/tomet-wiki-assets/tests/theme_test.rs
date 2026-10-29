@@ -94,6 +94,14 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
 
     // 7. Client config injected
     assert!(html.contains("window.tmtWikiCms = {\"owner\":\"acme\",\"repo\":\"wiki\",\"branch\":\"main\"}"));
+
+    // 8. Editor assets linked and present
+    assert!(html.contains("wiki-editor.css"));
+    let static_assets = renderer.static_assets();
+    assert!(static_assets.iter().any(|a| a.path == "wiki-editor.js"));
+    assert!(static_assets.iter().any(|a| a.path == "wiki-editor.css"));
+    assert!(static_assets.iter().any(|a| a.path == "wiki.css"));
+    assert!(static_assets.iter().any(|a| a.path == "wiki.js"));
 }
 
 #[test]

@@ -11,6 +11,14 @@ build:
 release:
     cargo build --workspace --release
 
+# Compile Svelte 5 Wiki editor bundle
+editor:
+    deno run --min-dep-age=0 --node-modules-dir=auto -A crates/tomet-wiki-assets/build-editor.ts
+
+# Verify editor bundle is up to date with sources
+editor-check: editor
+    git diff --exit-code crates/tomet-wiki-assets/assets/wiki-editor.js
+
 #[ Test & lint ]
 
 test:

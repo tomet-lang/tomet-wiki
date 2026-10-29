@@ -11,6 +11,8 @@ use tomet_wiki_headless::{
 
 pub const WIKI_CSS: &str = include_str!("../assets/wiki.css");
 pub const WIKI_JS: &str = include_str!("../assets/wiki.js");
+pub const WIKI_EDITOR_JS: &str = include_str!("../assets/wiki-editor.js");
+pub const WIKI_EDITOR_CSS: &str = include_str!("../assets/wiki-editor.css");
 
 pub const ICON_ASSETS: &[StaticAsset] = &[
     StaticAsset {
@@ -35,6 +37,16 @@ pub const STATIC_ASSETS: &[StaticAsset] = &[
         path: "wiki.js",
         mime: "application/javascript; charset=utf-8",
         content: WIKI_JS,
+    },
+    StaticAsset {
+        path: "wiki-editor.js",
+        mime: "application/javascript; charset=utf-8",
+        content: WIKI_EDITOR_JS,
+    },
+    StaticAsset {
+        path: "wiki-editor.css",
+        mime: "text/css; charset=utf-8",
+        content: WIKI_EDITOR_CSS,
     },
     StaticAsset {
         path: "icons/lucide.svg",
