@@ -4,10 +4,13 @@
   import {
     fetchFileFromGitHub,
     saveFileViaCms,
+    initCms,
     resolveRepoPath,
     listConflicts,
     type ConflictInfo,
   } from "./cms.ts";
+  import { Alert, Badge, Button, Field, Icon, Input, Modal, Spinner, Tabs } from "@telaion/ui";
+  import { TriangleAlert } from "@telaion/ui/icons";
   import RawEditor from "./RawEditor.svelte";
   import ConflictResolver from "./ConflictResolver.svelte";
 
@@ -56,7 +59,11 @@
   let patInput = $state("");
   let activeTab = $state<"editor" | "conflicts" | "auth">("editor");
 
-  const conflicts = $derived<ConflictInfo[]>(listConflicts(content));
+  // @tomet/cms is WebAssembly and must be initialized before it can read a document. Asked before
+  // that, it fails, and listConflicts turns the failure into "no conflicts". So wait for it, and
+  // look again once it is ready.
+  let cmsReady = $state(false);
+  const conflicts = $derived<ConflictInfo[]>(cmsReady ? listConflicts(content) : []);
   const isDirty = $derived(content !== originalRemoteContent);
 
   // Auto-switch to conflicts tab if conflicts exist
@@ -64,6 +71,10 @@
     if (conflicts.length > 0 && activeTab !== "conflicts" && activeTab !== "auth") {
       activeTab = "conflicts";
     }
+  });
+
+  onMount(() => {
+    initCms().then(() => (cmsReady = true));
   });
 
   onMount(() => {
@@ -221,84 +232,60 @@
       e.preventDefault();
       handleCommit();
     }
-    if (e.key === "Escape" && activeTab !== "auth") {
-      handleCloseModal();
-    }
   }
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<div class="tmt-editor-overlay" role="dialog" aria-modal="true">
-  <!-- Top Bar -->
-  <header class="tmt-editor-topbar">
-    <div class="tmt-topbar-left">
-      <span class="tmt-doc-icon">📄</span>
-      <span class="tmt-doc-path" title={relPath}>{relPath}</span>
-      <span class="tmt-branch-pill">{branch}</span>
+<!--
+  The whole editor is one full-size Modal. Closing it, by Escape, the close button or the backdrop,
+  goes through handleCloseModal, which asks first when there are unsaved changes. The modal itself
+  never closes: when the person agrees, onClose unmounts this component.
+-->
+<Modal
+  open
+  title={relPath}
+  size="full"
+  onrequestclose={() => {
+    handleCloseModal();
+    return false;
+  }}
+>
+  <div class="tmt-editor-body">
+    <div class="tmt-toolbar">
+      <Badge>{branch}</Badge>
       {#if !isProduction}
-        <span class="tmt-readonly-pill" title="Commits disabled in development mode. Pass --production to enable.">Read-Only</span>
+        <span title="Commits disabled in development mode. Pass --production to enable.">
+          <Badge tone="warn">Read-Only</Badge>
+        </span>
       {/if}
 
       {#if isDirty}
-        <span class="tmt-status-badge tmt-status-dirty">● Unsaved</span>
+        <Badge tone="warn">Unsaved</Badge>
       {:else if isSaving}
-        <span class="tmt-status-badge tmt-status-saving">● Saving...</span>
+        <Badge tone="accent">Saving...</Badge>
       {:else}
-        <span class="tmt-status-badge tmt-status-clean">● Clean</span>
+        <Badge tone="ok">Clean</Badge>
       {/if}
 
       {#if conflicts.length > 0}
-        <button
-          type="button"
-          class="tmt-tab-pill tmt-conflict-pill"
-          onclick={() => (activeTab = "conflicts")}
-        >
-          ⚠️ {conflicts.length} Conflict{conflicts.length > 1 ? "s" : ""}
-        </button>
+        <Button variant="quiet" onclick={() => (activeTab = "conflicts")}>
+          <Icon icon={TriangleAlert} />
+          {conflicts.length} Conflict{conflicts.length > 1 ? "s" : ""}
+        </Button>
       {/if}
-    </div>
 
-    <!-- Center Tab Switcher -->
-    <div class="tmt-tab-switcher">
-      <button
-        type="button"
-        class="tmt-tab-btn"
-        class:active={activeTab === "editor"}
-        onclick={() => (activeTab = "editor")}
-      >
-        Editor
-      </button>
-      {#if conflicts.length > 0}
-        <button
-          type="button"
-          class="tmt-tab-btn"
-          class:active={activeTab === "conflicts"}
-          onclick={() => (activeTab = "conflicts")}
-        >
-          Conflicts ({conflicts.length})
-        </button>
-      {/if}
-    </div>
-
-    <!-- Right Actions -->
-    <div class="tmt-topbar-right">
-      <input
-        type="text"
-        class="tmt-commit-msg-input"
-        placeholder="Commit message..."
-        bind:value={commitMessage}
-      />
-
-      <button
-        type="button"
-        class="tmt-action-btn tmt-commit-btn"
-        disabled={isSaving || !authStore.token || !isProduction}
-        onclick={handleCommit}
-        title={!isProduction ? "Commits disabled in development mode (requires --production)" : "Commit changes to GitHub"}
-      >
-        {isSaving ? "Saving..." : !isProduction ? "Read-Only" : "Commit"}
-      </button>
+      <div class="tmt-toolbar-tabs">
+        <Tabs
+          items={[
+            { id: "editor", label: "Editor" },
+            ...(conflicts.length > 0
+              ? [{ id: "conflicts", label: `Conflicts (${conflicts.length})` }]
+              : []),
+          ]}
+          bind:value={() => activeTab, (id) => (activeTab = id as typeof activeTab)}
+        />
+      </div>
 
       <!-- Auth avatar / login trigger -->
       {#if authStore.user}
@@ -306,52 +293,27 @@
           type="button"
           class="tmt-avatar-btn"
           title={`Logged in as ${authStore.user.login}. Click to manage auth.`}
+          aria-label={`Logged in as ${authStore.user.login}. Click to manage auth.`}
           onclick={() => (activeTab = activeTab === "auth" ? "editor" : "auth")}
         >
-          <img src={authStore.user.avatar_url} alt={authStore.user.login} class="tmt-avatar-img" />
+          <img src={authStore.user.avatar_url} alt="" class="tmt-avatar-img" />
         </button>
       {:else}
-        <button
-          type="button"
-          class="tmt-action-btn tmt-login-btn"
-          onclick={() => (activeTab = "auth")}
-        >
-          Log in
-        </button>
+        <Button onclick={() => (activeTab = "auth")}>Log in</Button>
       {/if}
-
-      <button
-        type="button"
-        class="tmt-action-btn tmt-close-modal-btn"
-        onclick={handleCloseModal}
-        title="Close editor"
-      >
-        ✕
-      </button>
     </div>
-  </header>
 
-  <!-- Alerts Bar -->
-  {#if errorMessage}
-    <div class="tmt-alert tmt-alert-error">
-      <span>{errorMessage}</span>
-      <button type="button" class="tmt-alert-dismiss" onclick={() => (errorMessage = null)}>✕</button>
-    </div>
-  {/if}
+    {#if errorMessage}
+      <Alert tone="danger" onDismiss={() => (errorMessage = null)}>{errorMessage}</Alert>
+    {/if}
+    {#if successMessage}
+      <Alert tone="ok" onDismiss={() => (successMessage = null)}>{successMessage}</Alert>
+    {/if}
 
-  {#if successMessage}
-    <div class="tmt-alert tmt-alert-success">
-      <span>{successMessage}</span>
-      <button type="button" class="tmt-alert-dismiss" onclick={() => (successMessage = null)}>✕</button>
-    </div>
-  {/if}
-
-  <!-- Main Body Content -->
-  <main class="tmt-editor-content">
-    {#if activeTab === "auth"}
-      <div class="tmt-auth-view">
+    <main class="tmt-editor-content">
+      {#if activeTab === "auth"}
         <div class="tmt-auth-card">
-          <h2>GitHub Authentication</h2>
+          <h3>GitHub Authentication</h3>
           <p>
             Authenticate with GitHub to commit updates directly to
             <code>{owner}/{repo}</code> on branch <code>{branch}</code>.
@@ -360,454 +322,201 @@
           {#if authStore.user}
             <div class="tmt-current-user">
               <img src={authStore.user.avatar_url} alt="" class="tmt-user-avatar-lg" />
-              <div>
+              <div class="tmt-user-name">
                 <strong>{authStore.user.name || authStore.user.login}</strong>
                 <span class="tmt-user-login">@{authStore.user.login}</span>
               </div>
-              <button
-                type="button"
-                class="tmt-btn tmt-btn-danger"
-                onclick={() => authStore.logout()}
-              >
-                Log out
-              </button>
+              <Button variant="danger" onclick={() => authStore.logout()}>Log out</Button>
             </div>
-            <button
-              type="button"
-              class="tmt-btn tmt-btn-primary"
-              onclick={() => (activeTab = "editor")}
-            >
-              Continue Editing
-            </button>
+            <div>
+              <Button variant="primary" onclick={() => (activeTab = "editor")}>Continue Editing</Button>
+            </div>
           {:else}
-            <button
-              type="button"
-              class="tmt-btn tmt-oauth-btn"
-              onclick={handleOAuthLogin}
-              disabled={authStore.loading}
-            >
-              Log in
-            </button>
+            <div>
+              <Button variant="primary" onclick={handleOAuthLogin} disabled={authStore.loading}>
+                Log in
+              </Button>
+            </div>
 
             <details class="tmt-pat-details">
-              <summary class="tmt-pat-summary">Advanced: Use Personal Access Token (PAT)</summary>
+              <summary>Advanced: Use Personal Access Token (PAT)</summary>
               <div class="tmt-pat-form">
-                <label for="tmt-pat-input">Personal Access Token (PAT)</label>
-                <input
-                  id="tmt-pat-input"
-                  type="password"
-                  placeholder="ghp_... or github_pat_..."
-                  class="tmt-input"
-                  bind:value={patInput}
-                />
-                <span class="tmt-hint">
-                  Requires repository content write permissions.
-                </span>
-                <button
-                  type="button"
-                  class="tmt-btn tmt-btn-primary"
-                  onclick={handlePatLogin}
-                  disabled={authStore.loading || !patInput.trim()}
+                <Field
+                  label="Personal Access Token (PAT)"
+                  hint="Requires repository content write permissions."
                 >
-                  {authStore.loading ? "Authenticating..." : "Save Token & Continue"}
-                </button>
+                  <Input type="password" placeholder="ghp_... or github_pat_..." bind:value={patInput} />
+                </Field>
+                <div>
+                  <Button
+                    variant="primary"
+                    onclick={handlePatLogin}
+                    disabled={authStore.loading || !patInput.trim()}
+                  >
+                    {authStore.loading ? "Authenticating..." : "Save Token & Continue"}
+                  </Button>
+                </div>
               </div>
             </details>
           {/if}
         </div>
-      </div>
-    {:else if isLoading}
-      <div class="tmt-loading-view">
-        <div class="tmt-spinner"></div>
-        <p>Loading document from GitHub...</p>
-      </div>
-    {:else if activeTab === "conflicts"}
-      <ConflictResolver
-        {content}
-        onResolve={(resolved) => handleContentChange(resolved)}
-        onManualEdit={() => (activeTab = "editor")}
-      />
-    {:else}
-      <RawEditor
-        bind:content
-        onChange={handleContentChange}
-      />
-    {/if}
-  </main>
-</div>
+      {:else if isLoading}
+        <div class="tmt-loading-view">
+          <Spinner label="Loading document from GitHub" />
+          <p>Loading document from GitHub...</p>
+        </div>
+      {:else if activeTab === "conflicts"}
+        <ConflictResolver
+          {content}
+          onResolve={(resolved) => handleContentChange(resolved)}
+          onManualEdit={() => (activeTab = "editor")}
+        />
+      {:else}
+        <div class="tmt-editor-frame">
+          <RawEditor bind:content onChange={handleContentChange} />
+        </div>
+      {/if}
+    </main>
+  </div>
+
+  {#snippet footer()}
+    <div class="tmt-commit-message">
+      <Input bind:value={commitMessage} placeholder="Commit message..." aria-label="Commit message" />
+    </div>
+    <Button
+      variant="primary"
+      disabled={isSaving || !authStore.token || !isProduction}
+      onclick={handleCommit}
+      title={!isProduction
+        ? "Commits disabled in development mode (requires --production)"
+        : "Commit changes to GitHub"}
+    >
+      {isSaving ? "Saving..." : !isProduction ? "Read-Only" : "Commit"}
+    </Button>
+  {/snippet}
+</Modal>
 
 <style>
-  .tmt-editor-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
+  /* Only the layout of this editor. Colors, fonts and sizes come from the Telaion tokens. */
+  .tmt-editor-body {
     display: flex;
     flex-direction: column;
-    background: var(--tmt-bg, #ffffff);
-    color: var(--tmt-fg, #1f2328);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    gap: calc(var(--tln-space) * 3);
+    height: 100%;
+    min-height: 0;
   }
 
-  .tmt-editor-topbar {
+  .tmt-toolbar {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
-    padding: 0.5rem 1rem;
-    background: var(--tmt-bg-subtle, #f6f8fa);
-    border-bottom: 1px solid var(--tmt-border, #d0d7de);
-    gap: 1rem;
+    gap: calc(var(--tln-space) * 2);
   }
 
-  .tmt-topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .tmt-toolbar-tabs {
+    flex: 1;
     min-width: 0;
-  }
-
-  .tmt-doc-icon {
-    font-size: 1.1rem;
-  }
-
-  .tmt-doc-path {
-    font-weight: 600;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-stream: ellipsis;
-    max-width: 240px;
-  }
-
-  .tmt-branch-pill {
-    padding: 0.15rem 0.45rem;
-    background: var(--tmt-bg, #ffffff);
-    border: 1px solid var(--tmt-border, #d0d7de);
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    color: var(--tmt-fg-muted, #656d76);
-  }
-
-  .tmt-readonly-pill {
-    padding: 0.15rem 0.45rem;
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    color: #b45309;
-    font-weight: 500;
-  }
-
-  .tmt-status-badge {
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-
-  .tmt-status-clean {
-    color: #16a34a;
-  }
-
-  .tmt-status-dirty {
-    color: #d97706;
-  }
-
-  .tmt-status-saving {
-    color: #2563eb;
-  }
-
-  .tmt-tab-pill {
-    background: #fef3c7;
-    border: 1px solid #f59e0b;
-    color: #b45309;
-    padding: 0.15rem 0.5rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .tmt-tab-switcher {
-    display: flex;
-    gap: 0.25rem;
-    background: var(--tmt-bg, #ffffff);
-    padding: 0.2rem;
-    border-radius: 6px;
-    border: 1px solid var(--tmt-border, #d0d7de);
-  }
-
-  .tmt-tab-btn {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: none;
-    background: transparent;
-    border-radius: 4px;
-    cursor: pointer;
-    color: var(--tmt-fg-muted, #656d76);
-  }
-
-  .tmt-tab-btn.active {
-    background: var(--tmt-bg-subtle, #f6f8fa);
-    color: var(--tmt-fg, #1f2328);
-    font-weight: 600;
-  }
-
-  .tmt-topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .tmt-commit-msg-input {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.85rem;
-    border: 1px solid var(--tmt-border, #d0d7de);
-    border-radius: 6px;
-    width: 220px;
-    background: var(--tmt-bg, #ffffff);
-    color: var(--tmt-fg, #1f2328);
-  }
-
-  .tmt-commit-msg-input:focus {
-    outline: none;
-    border-color: #0969da;
-  }
-
-  .tmt-action-btn {
-    padding: 0.35rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid transparent;
-  }
-
-  .tmt-commit-btn {
-    background: #1f883d;
-    color: #ffffff;
-  }
-  .tmt-commit-btn:hover:not(:disabled) {
-    background: #1a7f37;
-  }
-  .tmt-commit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .tmt-login-btn {
-    background: #0969da;
-    color: #ffffff;
-  }
-
-  .tmt-close-modal-btn {
-    background: transparent;
-    color: var(--tmt-fg-muted, #656d76);
-    font-size: 1rem;
-    padding: 0.35rem 0.5rem;
-  }
-  .tmt-close-modal-btn:hover {
-    color: var(--tmt-fg, #1f2328);
   }
 
   .tmt-avatar-btn {
     padding: 0;
-    border: none;
-    background: transparent;
+    line-height: 0;
+    background: none;
+    border: 1px solid var(--tln-border-strong);
+    border-radius: 50%;
     cursor: pointer;
-    display: flex;
-    align-items: center;
+  }
+
+  .tmt-avatar-btn:focus-visible {
+    outline: 2px solid var(--tln-accent);
+    outline-offset: 2px;
   }
 
   .tmt-avatar-img {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--tln-space) * 7);
+    height: calc(var(--tln-space) * 7);
     border-radius: 50%;
-    border: 1px solid var(--tmt-border, #d0d7de);
-  }
-
-  .tmt-alert {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .tmt-alert-error {
-    background: #ffebe9;
-    color: #cf222e;
-    border-bottom: 1px solid #ff8182;
-  }
-
-  .tmt-alert-success {
-    background: #dafbe1;
-    color: #1a7f37;
-    border-bottom: 1px solid #4ac26b;
-  }
-
-  .tmt-alert-dismiss {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: inherit;
-    font-weight: bold;
   }
 
   .tmt-editor-content {
-    flex-grow: 1;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .tmt-editor-frame {
+    height: 100%;
+    border: 1px solid var(--tln-border-strong);
+    border-radius: var(--tln-radius);
     overflow: hidden;
-    position: relative;
   }
 
   .tmt-loading-view {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: calc(var(--tln-space) * 3);
     height: 100%;
-    color: var(--tmt-fg-muted, #656d76);
-  }
-
-  .tmt-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top-color: #0969da;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 1rem;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .tmt-auth-view {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    padding: 2rem;
-    background: var(--tmt-bg-subtle, #f6f8fa);
+    color: var(--tln-fg-muted);
   }
 
   .tmt-auth-card {
-    background: var(--tmt-bg, #ffffff);
-    padding: 2rem;
-    border-radius: 12px;
-    border: 1px solid var(--tmt-border, #d0d7de);
-    max-width: 440px;
-    width: 100%;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: grid;
+    gap: calc(var(--tln-space) * 4);
+    max-width: calc(var(--tln-space) * 120);
+    margin: calc(var(--tln-space) * 8) auto;
+    padding: calc(var(--tln-space) * 6);
+    background: var(--tln-bg-subtle);
+    border: 1px solid var(--tln-border);
+    border-radius: var(--tln-radius);
   }
 
-  .tmt-auth-card h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.25rem;
-  }
-
+  .tmt-auth-card h3,
   .tmt-auth-card p {
-    font-size: 0.9rem;
-    color: var(--tmt-fg-muted, #656d76);
-    margin-bottom: 1.5rem;
+    margin: 0;
   }
 
-  .tmt-oauth-btn {
-    width: 100%;
-    background: #24292f;
-    color: #ffffff;
-    padding: 0.6rem;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    margin-bottom: 1rem;
-  }
-
-  .tmt-pat-details {
-    margin-top: 1rem;
-    border-top: 1px solid var(--tmt-border, #d0d7de);
-    padding-top: 0.75rem;
-  }
-
-  .tmt-pat-summary {
-    font-size: 0.8rem;
-    color: var(--tmt-fg-muted, #656d76);
-    cursor: pointer;
-    user-select: none;
-    margin-bottom: 0.75rem;
-  }
-
-  .tmt-pat-summary:hover {
-    color: var(--tmt-fg, #1f2328);
-  }
-
-  .tmt-pat-form label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-  }
-
-  .tmt-input {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--tmt-border, #d0d7de);
-    border-radius: 6px;
-    font-size: 0.9rem;
-    box-sizing: border-box;
-    background: var(--tmt-bg, #ffffff);
-    color: var(--tmt-fg, #1f2328);
-  }
-
-  .tmt-hint {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--tmt-fg-muted, #656d76);
-    margin: 0.35rem 0 1rem 0;
-  }
-
-  .tmt-btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border: 1px solid transparent;
-  }
-
-  .tmt-btn-primary {
-    background: #0969da;
-    color: #ffffff;
-    width: 100%;
-  }
-
-  .tmt-btn-danger {
-    background: #cf222e;
-    color: #ffffff;
+  .tmt-auth-card code {
+    font-family: var(--tln-font-mono);
   }
 
   .tmt-current-user {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--tmt-bg-subtle, #f6f8fa);
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
+    gap: calc(var(--tln-space) * 3);
   }
 
   .tmt-user-avatar-lg {
-    width: 44px;
-    height: 44px;
+    width: calc(var(--tln-space) * 12);
+    height: calc(var(--tln-space) * 12);
     border-radius: 50%;
   }
 
+  .tmt-user-name {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
   .tmt-user-login {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--tmt-fg-muted, #656d76);
+    color: var(--tln-fg-muted);
+    font-size: var(--tln-text-sm);
+  }
+
+  .tmt-pat-details summary {
+    cursor: pointer;
+    color: var(--tln-fg-muted);
+    font-size: var(--tln-text-sm);
+  }
+
+  .tmt-pat-form {
+    display: grid;
+    gap: calc(var(--tln-space) * 3);
+    margin-top: calc(var(--tln-space) * 3);
+  }
+
+  .tmt-commit-message {
+    flex: 1 1 calc(var(--tln-space) * 60);
+    min-width: 0;
   }
 </style>

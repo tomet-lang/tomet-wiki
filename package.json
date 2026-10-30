@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "description": "npm dependencies of the wiki editor bundle (crates/tomet-wiki-assets/build-editor.ts). Deno installs them into node_modules for Vite.",
+  "dependencies": {
+    "@telaion/editor": "^0.1.4",
+    "@telaion/tomet": "^0.1.4",
+    "@telaion/ui": "^0.1.4",
+    "@codemirror/view": "^6.36.0"
+  }
+}

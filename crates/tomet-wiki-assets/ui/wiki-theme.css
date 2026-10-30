@@ -1,0 +1,31 @@
+/*
+ * The wiki's palette, for the design tokens of Telaion.
+ *
+ * Telaion draws everything in `--tln-*` tokens. The wiki page already has its own palette in
+ * `--tmt-*` (wiki.css), so the editor takes those values instead of Telaion's defaults and looks
+ * like the page around it. Only two values are not taken as they are, both for contrast:
+ *
+ * - Light: `--tmt-fg-muted` is 4.34:1 on the code surface. Slate 600 is not.
+ * - Dark: white on `--tmt-primary` is 3.68:1. The page background on it is 5.28:1.
+ *
+ * The state colors (ok, warn, danger) stay as Telaion has them.
+ */
+:root {
+  --tln-bg: var(--tmt-bg);
+  --tln-bg-subtle: var(--tmt-bg-subtle);
+  --tln-bg-sunken: var(--tmt-bg-code);
+  --tln-fg: var(--tmt-fg);
+  --tln-fg-muted: #475569;
+  --tln-border: var(--tmt-border);
+  --tln-border-strong: var(--tmt-fg-muted);
+  --tln-accent: var(--tmt-primary);
+  --tln-accent-hover: var(--tmt-primary-hover);
+  --tln-accent-fg: var(--tmt-primary-fg);
+  --tln-font-sans: var(--tmt-font-sans);
+  --tln-font-mono: var(--tmt-font-mono);
+}
+
+[data-theme="dark"] {
+  --tln-fg-muted: var(--tmt-fg-muted);
+  --tln-accent-fg: var(--tmt-bg);
+}

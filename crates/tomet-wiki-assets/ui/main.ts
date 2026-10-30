@@ -1,4 +1,6 @@
 import { mount, unmount } from "svelte";
+import "@telaion/ui/tokens.css";
+import "./wiki-theme.css";
 import EditorModal from "./EditorModal.svelte";
 import NewPageModal from "./NewPageModal.svelte";
 
