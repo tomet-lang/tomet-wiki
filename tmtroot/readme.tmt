@@ -77,9 +77,12 @@ just build
 === Build Svelte 5 editor bundle
 
 ```bash
-just editor        # compile Svelte 5 editor island via Deno into assets/
+just wasm          # build the editor's own WebAssembly (crates/tomet-wiki-wasm)
+just editor        # `just wasm`, then compile the Svelte 5 editor island via Deno into assets/
 just editor-check  # verify assets are up to date with sources
 ```
+
+The editor's WebAssembly is built here, not taken from a package: `tomet-wiki-wasm` carries the GitHub client and conflict functions of `tomet-cms-js` and its own `highlightSpans` (syntax colors from `tomet::highlight`, offsets in UTF-16 code units), and is inlined into `wiki-editor.js`. The dev shell provides the `wasm32-unknown-unknown` target and `wasm-bindgen`.
 
 === Run tests
 

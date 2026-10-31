@@ -1,27 +1,27 @@
 import { build } from "npm:vite@6";
 import { svelte } from "npm:@sveltejs/vite-plugin-svelte@5";
 import "npm:svelte@5";
-import "npm:@tomet/cms@^0.1.0";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { Buffer } from "node:buffer";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Resolve @tomet/cms from npm package without any external repository paths
-const require = createRequire(import.meta.url);
-const tometCmsEntry = require.resolve("@tomet/cms");
-const tometCmsDir = dirname(tometCmsEntry);
-const wasmPath = resolve(tometCmsDir, "pkg/tomet_cms_js_bg.wasm");
-const jsBindingsPath = resolve(tometCmsDir, "pkg/tomet_cms_js.js");
+// The wiki's own WebAssembly (crates/tomet-wiki-wasm), made by `just wasm`.
+const wasmDir = resolve(__dirname, "../tomet-wiki-wasm/pkg");
+const wasmPath = resolve(wasmDir, "tomet_wiki_wasm_bg.wasm");
+const jsBindingsPath = resolve(wasmDir, "tomet_wiki_wasm.js");
+if (!existsSync(wasmPath) || !existsSync(jsBindingsPath)) {
+  throw new Error(`${wasmDir} has no wasm: run \`just wasm\` first (\`just editor\` does).`);
+}
 
 function inlineWasmPlugin(wasmFilePath: string) {
-  const virtualId = "virtual:tomet-cms-wasm";
+  const virtualId = "virtual:tomet-wiki-wasm";
   const resolvedId = "\0" + virtualId;
   return {
-    name: "inline-tomet-cms-wasm",
+    name: "inline-tomet-wiki-wasm",
     resolveId(id: string) {
       if (id === virtualId) return resolvedId;
     },
@@ -66,7 +66,7 @@ await build({
   resolve: {
     conditions: ["browser", "production"],
     alias: {
-      "@tomet/cms/pkg": jsBindingsPath,
+      "tomet-wiki-wasm": jsBindingsPath,
     },
   },
   build: {

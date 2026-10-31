@@ -59,7 +59,7 @@
   let patInput = $state("");
   let activeTab = $state<"editor" | "conflicts" | "auth">("editor");
 
-  // @tomet/cms is WebAssembly and must be initialized before it can read a document. Asked before
+  // The wiki's wasm must be initialized before it can read a document. Asked before
   // that, it fails, and listConflicts turns the failure into "no conflicts". So wait for it, and
   // look again once it is ready.
   let cmsReady = $state(false);

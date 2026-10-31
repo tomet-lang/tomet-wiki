@@ -1,9 +1,19 @@
+// The wiki's own WebAssembly (crates/tomet-wiki-wasm): the cms functions of tomet-cms-js and the
+// wiki's highlightSpans in one module. build-editor.ts points this name at the built pkg.
 import initWasm, {
   GitHubCms as RawGitHubCms,
+  highlightSpans as rawHighlightSpans,
   listConflicts as rawListConflicts,
   resolveConflict as rawResolveConflict,
-} from "@tomet/cms/pkg";
-import { getWasmBytes } from "virtual:tomet-cms-wasm";
+} from "tomet-wiki-wasm";
+import { getWasmBytes } from "virtual:tomet-wiki-wasm";
+
+/** A range to color. Offsets count UTF-16 code units, as CodeMirror and Telaion do. */
+export interface HighlightSpan {
+  from: number;
+  to: number;
+  tag: string;
+}
 
 export interface ConflictInfo {
   index: number;
@@ -29,6 +39,12 @@ export async function initCms(): Promise<void> {
     })();
   }
   return wasmInitPromise;
+}
+
+/** The syntax colors of a Tomet text. Waits for the wasm, so it may be asked at any time. */
+export async function highlight(source: string): Promise<HighlightSpan[]> {
+  await initCms();
+  return rawHighlightSpans(source);
 }
 
 export function listConflicts(content: string): ConflictInfo[] {

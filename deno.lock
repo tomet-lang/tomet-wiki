@@ -6,7 +6,6 @@
     "npm:@telaion/editor@~0.1.4": "0.1.4_svelte@5.57.3",
     "npm:@telaion/tomet@~0.1.4": "0.1.4_@codemirror+state@6.7.6_@codemirror+view@6.43.15_svelte@5.57.3",
     "npm:@telaion/ui@~0.1.4": "0.1.4_svelte@5.57.3",
-    "npm:@tomet/cms@0.1": "0.1.0",
     "npm:svelte@5": "5.57.3",
     "npm:vite@6": "6.4.5"
   },
@@ -410,9 +409,6 @@
       "dependencies": [
         "svelte"
       ]
-    },
-    "@tomet/cms@0.1.0": {
-      "integrity": "sha512-5LvwNOJOERKcX2lakPgeYwPgZHd9rCc66EYhajo2oE1+zhfGYw99Pc8spY3jbLW25RHW6JmwkpwPp8d3ZAqvPA=="
     },
     "@types/estree@1.0.9": {
       "integrity": "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="

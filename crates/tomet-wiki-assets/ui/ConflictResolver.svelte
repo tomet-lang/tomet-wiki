@@ -17,14 +17,14 @@
     onManualEdit: () => void;
   } = $props();
 
-  // Telaion carries no Tomet engine. The wiki ships @tomet/cms (WebAssembly) and describes it here.
+  // Telaion carries no Tomet engine. The wiki ships its own WebAssembly (crates/tomet-wiki-wasm) and describes it here.
   // The engine must be initialized before it answers; asking it too early would look like
   // "no conflicts", so every call waits for it.
   const services: Pick<TometServices, "listConflicts" | "resolveConflict"> = {
     async listConflicts(source) {
       await initCms();
       const found = listConflicts(source);
-      // @tomet/cms counts UTF-8 bytes; Telaion counts UTF-16 code units, as JavaScript does.
+      // The cms functions count UTF-8 bytes; Telaion counts UTF-16 code units, as JavaScript does.
       const spans = utf8ToUtf16Spans(
         source,
         found.map((c) => ({ from: c.span.start, to: c.span.end, tag: c.kind })),
