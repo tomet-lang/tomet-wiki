@@ -17,6 +17,7 @@ let
       "rustfmt"
       "rust-analyzer"
     ])
+    fenix.targets.wasm32-unknown-unknown.stable.rust-std
   ];
 in
 mkShell {
@@ -36,6 +37,7 @@ mkShell {
     cargo-edit
     cargo-outdated
     cargo-nextest
+    wasm-bindgen-cli
   ];
 
   shellHook = ''
