@@ -1,0 +1,21 @@
+[package]
+name = "tomet-wiki-wasm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "The WebAssembly of the wiki editor: what it needs from Tomet, and nothing else."
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+tomet-cms-js.workspace = true
+tomet = { workspace = true, features = ["highlight"] }
+
+#= Crates.io
+js-sys.workspace = true
+serde.workspace = true
+serde-wasm-bindgen.workspace = true
+wasm-bindgen.workspace = true

@@ -2,6 +2,8 @@
 # Files ignored by Git.
 # -----------------------------------------------------------------------
 
+crates/tomet-wiki-wasm/pkg/
+
 #= Build
 build/
 dist/
