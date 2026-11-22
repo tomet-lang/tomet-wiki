@@ -3,10 +3,7 @@ use std::path::PathBuf;
 use tomet_wiki_headless::{MinimalWikiRendererFactory, WikiConfig, build_wiki};
 
 fn temp_dir(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "tomet-wiki-test-{name}-{}",
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("tomet-wiki-test-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     dir
@@ -61,7 +58,11 @@ Backlink target pointing to [[hello]].
     let report = build_wiki(&src, &out, &config, &MinimalWikiRendererFactory, true)
         .expect("build_wiki failed");
 
-    assert!(report.failures.is_empty(), "failures: {:?}", report.failures);
+    assert!(
+        report.failures.is_empty(),
+        "failures: {:?}",
+        report.failures
+    );
     assert_eq!(report.rendered, 2);
 
     let hello_html_path = out.join("wiki/notes/hello/index.html");

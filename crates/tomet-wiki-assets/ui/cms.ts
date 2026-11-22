@@ -56,7 +56,11 @@ export function listConflicts(content: string): ConflictInfo[] {
   }
 }
 
-export function resolveConflict(content: string, index: number, side: "a" | "b"): string {
+export function resolveConflict(
+  content: string,
+  index: number,
+  side: "a" | "b",
+): string {
   return rawResolveConflict(content, index, side);
 }
 

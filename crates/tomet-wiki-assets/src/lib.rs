@@ -170,9 +170,9 @@ impl PageRenderer for WikiAssetsRenderer {
                     args: None,
                 })
             }
-            DocIcon::Image { src } => {
-                Some(format!(r#"<img class="tm-doc-icon-img" src="{src}" alt="" />"#))
-            }
+            DocIcon::Image { src } => Some(format!(
+                r#"<img class="tm-doc-icon-img" src="{src}" alt="" />"#
+            )),
         });
 
         let template = PageTemplate {

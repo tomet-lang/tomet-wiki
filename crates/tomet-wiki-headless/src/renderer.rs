@@ -42,11 +42,8 @@ pub trait PageRenderer: Send + Sync {
     ) -> Result<String>;
 
     /// Render the catalog/index page into a complete HTML string.
-    fn render_index(
-        &self,
-        sections: &[SectionSummary],
-        entries: &[EntrySummary],
-    ) -> Result<String>;
+    fn render_index(&self, sections: &[SectionSummary], entries: &[EntrySummary])
+    -> Result<String>;
 
     /// Render a 404 Not Found page into a complete HTML string.
     fn render_not_found(&self, missing_path: &str) -> Result<String> {

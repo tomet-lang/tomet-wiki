@@ -39,7 +39,9 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
     config.cms.owner = "acme".to_string();
     config.cms.repo = "wiki".to_string();
 
-    let renderer = ASSETS.create(&config, false).expect("renderer creation failed");
+    let renderer = ASSETS
+        .create(&config, false)
+        .expect("renderer creation failed");
 
     let doc = create_sample_doc(
         r#"<p>Follow these steps.</p>
@@ -59,7 +61,9 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
         children: vec![],
     }];
 
-    let html = renderer.render_page(&doc, &backlinks, &wiki_index).expect("render_page failed");
+    let html = renderer
+        .render_page(&doc, &backlinks, &wiki_index)
+        .expect("render_page failed");
 
     // 1. Check title & brand
     assert!(html.contains("Getting Started | Engineering Wiki"));
@@ -72,14 +76,38 @@ fn test_wiki_page_renders_without_sidebar_and_has_editor_mount_points() {
     assert!(!html.contains("pagination-next"));
 
     // 3. Editor mount points & buttons
-    assert!(html.contains(r#"id="tmt-wiki-editor-root""#), "Must have editor mount root");
-    assert!(html.contains(r#"id="tmt-wiki-edit-btn""#), "Must have edit button");
-    assert!(html.contains(r#"data-rel-path="guides/getting-started.tmt""#), "Edit button must have rel_path");
-    assert!(html.contains(r#"id="tmt-wiki-new-btn""#), "Must have new page button");
-    assert!(html.contains(r#"id="tmt-wiki-search-trigger""#), "Must have search trigger");
-    assert!(html.contains(r#"id="tmt-wiki-auth-container""#), "Must have auth container");
-    assert!(html.contains(r#"id="tmt-wiki-login-btn""#), "Must have login button");
-    assert!(html.contains("tmt-auth-only"), "Must have tmt-auth-only gated buttons");
+    assert!(
+        html.contains(r#"id="tmt-wiki-editor-root""#),
+        "Must have editor mount root"
+    );
+    assert!(
+        html.contains(r#"id="tmt-wiki-edit-btn""#),
+        "Must have edit button"
+    );
+    assert!(
+        html.contains(r#"data-rel-path="guides/getting-started.tmt""#),
+        "Edit button must have rel_path"
+    );
+    assert!(
+        html.contains(r#"id="tmt-wiki-new-btn""#),
+        "Must have new page button"
+    );
+    assert!(
+        html.contains(r#"id="tmt-wiki-search-trigger""#),
+        "Must have search trigger"
+    );
+    assert!(
+        html.contains(r#"id="tmt-wiki-auth-container""#),
+        "Must have auth container"
+    );
+    assert!(
+        html.contains(r#"id="tmt-wiki-login-btn""#),
+        "Must have login button"
+    );
+    assert!(
+        html.contains("tmt-auth-only"),
+        "Must have tmt-auth-only gated buttons"
+    );
 
     // 4. Main container with data-tmt-rel-path
     assert!(html.contains(r#"data-tmt-rel-path="guides/getting-started.tmt""#));

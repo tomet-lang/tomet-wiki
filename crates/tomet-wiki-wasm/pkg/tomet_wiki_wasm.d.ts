@@ -75,22 +75,26 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly __wbg_githubcms_free: (a: number, b: number) => void;
-    readonly githubcms_createFile: (a: number, b: number) => number;
-    readonly githubcms_editFile: (a: number, b: number) => number;
-    readonly githubcms_getHead: (a: number) => number;
-    readonly githubcms_new: (a: number, b: number) => void;
-    readonly githubcms_readFile: (a: number, b: number, c: number, d: number, e: number) => number;
+    readonly githubcms_createFile: (a: number, b: any) => any;
+    readonly githubcms_editFile: (a: number, b: any) => any;
+    readonly githubcms_getHead: (a: number) => any;
+    readonly githubcms_new: (a: number, b: any) => void;
+    readonly githubcms_readFile: (a: number, b: number, c: number, d: number, e: number) => any;
     readonly highlightSpans: (a: number, b: number, c: number) => void;
     readonly listConflicts: (a: number, b: number, c: number) => void;
     readonly resolveConflict: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-    readonly __wasm_bindgen_func_elem_849: (a: number, b: number, c: number, d: number) => void;
-    readonly __wasm_bindgen_func_elem_851: (a: number, b: number, c: number, d: number) => void;
+    readonly __wasm_bindgen_func_elem_873: (a: number, b: number, c: number, d: any) => void;
+    readonly __wasm_bindgen_func_elem_875: (a: number, b: number, c: any, d: any) => void;
     readonly __wbindgen_export: (a: number, b: number) => number;
     readonly __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;
-    readonly __wbindgen_export3: (a: number) => void;
-    readonly __wbindgen_export4: (a: number, b: number) => void;
+    readonly __wbindgen_export3: (a: number, b: number, c: number) => void;
+    readonly __wbindgen_export4: (a: number) => void;
+    readonly __wbindgen_export5: () => number;
+    readonly __wbindgen_externrefs: WebAssembly.Table;
+    readonly __wbindgen_export6: (a: number, b: number) => void;
     readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-    readonly __wbindgen_export5: (a: number, b: number, c: number) => void;
+    readonly __wbindgen_export7: (a: number) => void;
+    readonly __wbindgen_start: () => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;

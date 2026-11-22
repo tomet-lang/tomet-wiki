@@ -7,10 +7,8 @@ use tomet_shelf_serve::axum::http::{StatusCode, Uri, header};
 use tomet_wiki_headless::{MinimalWikiRendererFactory, WikiConfig, WikiDevHandler};
 
 fn temp_dir(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "tomet-wiki-dev-test-{name}-{}",
-        std::process::id()
-    ));
+    let dir =
+        std::env::temp_dir().join(format!("tomet-wiki-dev-test-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     dir
@@ -56,7 +54,8 @@ url_prefix = "/wiki"
 
     // 1. SSR request to /wiki/guides/start
     let uri = Uri::from_static("/wiki/guides/start");
-    let resp = tomet_wiki_headless::serve::handle_http_request(&uri, handler.state(), &src, &config);
+    let resp =
+        tomet_wiki_headless::serve::handle_http_request(&uri, handler.state(), &src, &config);
     assert_eq!(resp.status(), StatusCode::OK);
     assert_eq!(
         resp.headers().get(header::CONTENT_TYPE).unwrap(),
@@ -95,7 +94,8 @@ url_prefix = "/wiki"
     assert_eq!(signals, vec![tomet_shelf_serve::ReloadSignal::Full]);
 
     // Check that config is reloaded
-    let resp2 = tomet_wiki_headless::serve::handle_http_request(&uri, handler.state(), &src, &config);
+    let resp2 =
+        tomet_wiki_headless::serve::handle_http_request(&uri, handler.state(), &src, &config);
     let body_bytes2 = to_bytes(resp2.into_body(), usize::MAX).await.unwrap();
     let body_str2 = String::from_utf8_lossy(&body_bytes2);
     assert!(body_str2.contains("Renamed Wiki"));

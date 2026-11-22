@@ -14,7 +14,9 @@ const wasmDir = resolve(__dirname, "../tomet-wiki-wasm/pkg");
 const wasmPath = resolve(wasmDir, "tomet_wiki_wasm_bg.wasm");
 const jsBindingsPath = resolve(wasmDir, "tomet_wiki_wasm.js");
 if (!existsSync(wasmPath) || !existsSync(jsBindingsPath)) {
-  throw new Error(`${wasmDir} has no wasm: run \`just wasm\` first (\`just editor\` does).`);
+  throw new Error(
+    `${wasmDir} has no wasm: run \`just wasm\` first (\`just editor\` does).`,
+  );
 }
 
 function inlineWasmPlugin(wasmFilePath: string) {
@@ -59,10 +61,7 @@ console.log("Compiling Svelte 5 Wiki Editor Bundle with Deno & Vite 6...");
 
 await build({
   root: __dirname,
-  plugins: [
-    inlineWasmPlugin(wasmPath),
-    svelte(),
-  ],
+  plugins: [inlineWasmPlugin(wasmPath), svelte()],
   resolve: {
     conditions: ["browser", "production"],
     alias: {
@@ -98,4 +97,6 @@ try {
   // Ignore if not present
 }
 
-console.log("Done! Output generated at assets/wiki-editor.js and assets/wiki-editor.css");
+console.log(
+  "Done! Output generated at assets/wiki-editor.js and assets/wiki-editor.css",
+);

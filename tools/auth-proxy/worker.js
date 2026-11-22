@@ -27,7 +27,7 @@ export default {
     if (!env.CLIENT_ID || !env.CLIENT_SECRET) {
       return new Response(
         "Missing CLIENT_ID or CLIENT_SECRET environment secrets in Cloudflare Worker.",
-        { status: 500, headers: { "Content-Type": "text/plain" } }
+        { status: 500, headers: { "Content-Type": "text/plain" } },
       );
     }
 
@@ -35,24 +35,28 @@ export default {
     const code = url.searchParams.get("code");
     if (code) {
       try {
-        const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "User-Agent": "tomet-auth-proxy",
+        const tokenRes = await fetch(
+          "https://github.com/login/oauth/access_token",
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "User-Agent": "tomet-auth-proxy",
+            },
+            body: JSON.stringify({
+              client_id: env.CLIENT_ID,
+              client_secret: env.CLIENT_SECRET,
+              code,
+            }),
           },
-          body: JSON.stringify({
-            client_id: env.CLIENT_ID,
-            client_secret: env.CLIENT_SECRET,
-            code,
-          }),
-        });
+        );
 
         const data = await tokenRes.json();
 
         if (data.error || !data.access_token) {
-          const errDesc = data.error_description || data.error || "Failed to exchange token";
+          const errDesc =
+            data.error_description || data.error || "Failed to exchange token";
           return renderHtml(`
             <h2>Authentication Failed</h2>
             <p>${escapeHtml(errDesc)}</p>
@@ -100,10 +104,12 @@ export default {
 
     // Step 1: Initiate OAuth flow - redirect to GitHub
     const siteId = url.searchParams.get("site_id") || "";
-    const state = siteId ? encodeURIComponent(siteId) : Math.random().toString(36).substring(2);
+    const state = siteId
+      ? encodeURIComponent(siteId)
+      : Math.random().toString(36).substring(2);
     const redirectUri = `${url.origin}${url.pathname}`;
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(
-      env.CLIENT_ID
+      env.CLIENT_ID,
     )}&scope=repo&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
     return Response.redirect(githubAuthUrl, 302);

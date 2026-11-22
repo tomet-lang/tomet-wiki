@@ -1,32 +1,32 @@
 [workspace]
 resolver = "3"
-members = ["app", "crates/*"]
+members  = ["app", "crates/*"]
 
 default-members = ["app"]
 
 [workspace.package]
-version = "0.1.0"
-edition = "2024"
+version      = "0.1.0"
+edition      = "2024"
 rust-version = "1.85"
-license = "MIT OR Apache-2.0"
+license      = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 #= Internal
+tomet-wiki-assets   = { path = "crates/tomet-wiki-assets" }
 tomet-wiki-headless = { path = "crates/tomet-wiki-headless" }
-tomet-wiki-assets = { path = "crates/tomet-wiki-assets" }
-tomet-wiki-wasm = { path = "crates/tomet-wiki-wasm" }
+tomet-wiki-wasm     = { path = "crates/tomet-wiki-wasm" }
 
 #= Tomet CMS
 tomet-cms-js = { git = "https://github.com/tomet-lang/tomet-cms.git" }
 
 #= Tomet Shelf
-tomet-shelf-config = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-config   = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
 tomet-shelf-document = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
-tomet-shelf-icons = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
-tomet-shelf-render = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
-tomet-shelf-route = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
-tomet-shelf-search = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
-tomet-shelf-serve = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-icons    = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-render   = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-route    = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-search   = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
+tomet-shelf-serve    = { git = "https://github.com/tomet-lang/tomet-shelf.git" }
 
 #= Tomet
 tomet = { git = "https://github.com/tomet-lang/tomet.git", features = [
@@ -36,35 +36,35 @@ tomet = { git = "https://github.com/tomet-lang/tomet.git", features = [
 ] }
 
 #= Crates.io
-anyhow = "1"
-askama = { version = "0.16", features = ["serde_json"] }
-clap = { version = "4.6", features = ["derive"] }
-js-sys = "0.3"
-notify = "6.1"
-pagefind = { version = "1.5", default-features = false }
-percent-encoding = "2.3"
-rayon = "1.10"
-serde = { version = "1.0", features = ["derive"] }
+anyhow             = "1"
+askama             = { version = "0.16", features = ["serde_json"] }
+clap               = { version = "4.6", features = ["derive"] }
+js-sys             = "0.3"
+notify             = "6.1"
+pagefind           = { version = "1.5", default-features = false }
+percent-encoding   = "2.3"
+rayon              = "1.10"
+serde              = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
-serde_json = { version = "1.0", features = ["preserve_order"] }
-tokio = { version = "1.42", features = ["full"] }
-toml = "0.8"
-tracing = "0.1"
+serde_json         = { version = "1.0", features = ["preserve_order"] }
+tokio              = { version = "1.42", features = ["full"] }
+toml               = "0.8"
+tracing            = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-walkdir = "2.5"
+walkdir            = "2.5"
 # The version of the wasm-bindgen CLI in the dev shell must be the same.
-wasm-bindgen = "=0.2.129"
+wasm-bindgen = "=0.2.130"
 
 [profile.release]
-opt-level = 3
-lto = "fat"
+opt-level     = 3
+lto           = "fat"
 codegen-units = 1
-panic = "abort"
-strip = true
+panic         = "abort"
+strip         = true
 
 # The wasm of the editor travels inside the editor bundle: small first.
 [profile.wasm]
-inherits = "release"
+inherits  = "release"
 opt-level = "s"
 
 [profile.dev.package."*"]

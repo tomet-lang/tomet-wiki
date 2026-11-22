@@ -53,7 +53,8 @@ impl DevVaultState {
             let Ok(source) = fs::read_to_string(&doc_file.abs_path) else {
                 continue;
             };
-            if let Ok(doc) = tomet_shelf_document::parse_tomet_document(&source, &doc_file.rel_path) {
+            if let Ok(doc) = tomet_shelf_document::parse_tomet_document(&source, &doc_file.rel_path)
+            {
                 parsed.push((doc, doc_file.clone()));
             }
         }
@@ -99,7 +100,7 @@ impl DevVaultState {
                 Some(&doc_file.abs_path),
                 &book_config,
                 &scanned.vault_index,
-                &scanned.workspace_config_blocks,
+                &scanned.workspace_config_declarations,
                 &unpublished,
                 Some(&route_table),
                 custom_element.clone(),
@@ -180,14 +181,16 @@ impl DevVaultState {
             Some(&abs_path),
             &book_config,
             &self.scanned.vault_index,
-            &self.scanned.workspace_config_blocks,
+            &self.scanned.workspace_config_declarations,
             &self.unpublished,
             Some(&self.route_table),
             custom_element,
         )?;
 
         let incoming = self.backlinks.get(slug).map(Vec::as_slice).unwrap_or(&[]);
-        let html = self.renderer.render_page(&processed, incoming, &self.wiki_index)?;
+        let html = self
+            .renderer
+            .render_page(&processed, incoming, &self.wiki_index)?;
         Ok(Some(html))
     }
 
@@ -556,7 +559,9 @@ pub fn handle_http_request(
     {
         Some(rel.trim_matches('/'))
     } else {
-        unbased_path.strip_prefix("/vault").map(|s| s.trim_matches('/'))
+        unbased_path
+            .strip_prefix("/vault")
+            .map(|s| s.trim_matches('/'))
     };
 
     if let Some(rel) = media_rel

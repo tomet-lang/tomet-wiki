@@ -102,9 +102,18 @@ mod tests {
         // 日本語 is 9 bytes but 3 units; 😀 is 4 bytes and 2 units.
         let src = "日本語 😀 @note(id: \"x\")[text]\n";
         let found = tagged(src);
-        assert!(found.contains(&("@note".to_string(), "tagName")), "{found:?}");
-        assert!(found.contains(&("id".to_string(), "propertyName")), "{found:?}");
-        assert!(found.contains(&("\"x\"".to_string(), "string")), "{found:?}");
+        assert!(
+            found.contains(&("@note".to_string(), "tagName")),
+            "{found:?}"
+        );
+        assert!(
+            found.contains(&("id".to_string(), "propertyName")),
+            "{found:?}"
+        );
+        assert!(
+            found.contains(&("\"x\"".to_string(), "string")),
+            "{found:?}"
+        );
         // Not the byte offset (15): in UTF-16 it is 3 + space + 2 + space = 7.
         let note = spans(src).into_iter().find(|s| s.tag == "tagName").unwrap();
         assert_eq!(note.from, 7);
@@ -115,7 +124,10 @@ mod tests {
         let src = "= 見出し\n\n本文 @em[強調] と `コード`\n";
         let found = tagged(src);
         assert!(found.contains(&("=".to_string(), "heading")), "{found:?}");
-        assert!(found.contains(&("`コード`".to_string(), "monospace")), "{found:?}");
+        assert!(
+            found.contains(&("`コード`".to_string(), "monospace")),
+            "{found:?}"
+        );
     }
 
     #[test]

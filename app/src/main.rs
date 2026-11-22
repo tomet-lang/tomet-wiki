@@ -58,15 +58,7 @@ async fn main() -> Result<()> {
                 config.production = true;
             }
 
-            run_dev_server(
-                src_dir,
-                out_dir,
-                config,
-                Arc::new(ASSETS),
-                host,
-                port,
-            )
-            .await?;
+            run_dev_server(src_dir, out_dir, config, Arc::new(ASSETS), host, port).await?;
         }
         Commands::Init {
             dir,

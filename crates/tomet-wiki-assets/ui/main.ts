@@ -22,7 +22,10 @@ export interface EditorOptions {
 
 let activeInstance: Record<string, any> | null = null;
 
-export function mountWikiEditor(target: HTMLElement, options: EditorOptions = {}) {
+export function mountWikiEditor(
+  target: HTMLElement,
+  options: EditorOptions = {},
+) {
   closeWikiEditor();
 
   const config = options.config || (window as any).tmtWikiCms || {};
@@ -77,6 +80,7 @@ if (typeof window !== "undefined") {
   (window as any).__tmtWikiEditor = {
     mount: mountWikiEditor,
     close: closeWikiEditor,
-    open: (target: HTMLElement, options?: EditorOptions) => mountWikiEditor(target, options),
+    open: (target: HTMLElement, options?: EditorOptions) =>
+      mountWikiEditor(target, options),
   };
 }

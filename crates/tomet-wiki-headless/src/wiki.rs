@@ -54,11 +54,14 @@ pub fn build_backlink_index(
     let mut backlinks: HashMap<String, Vec<Backlink>> = HashMap::new();
     for source in docs {
         for target_slug in &source.outgoing {
-            backlinks.entry(target_slug.clone()).or_default().push(Backlink {
-                url: format!("{clean_url_prefix}/{}", source.slug),
-                title: source.title.clone(),
-                section: source.section.clone(),
-            });
+            backlinks
+                .entry(target_slug.clone())
+                .or_default()
+                .push(Backlink {
+                    url: format!("{clean_url_prefix}/{}", source.slug),
+                    title: source.title.clone(),
+                    section: source.section.clone(),
+                });
         }
     }
     for list in backlinks.values_mut() {
@@ -108,7 +111,9 @@ pub fn run_pagefind(out_dir: &Path) -> Result<()> {
             }
         }
         Err(e) => {
-            warn!("Pagefind executable not found or failed to execute: {e}. Search indexing skipped.");
+            warn!(
+                "Pagefind executable not found or failed to execute: {e}. Search indexing skipped."
+            );
         }
     }
     Ok(())
@@ -122,7 +127,10 @@ pub fn build_native_search_index(
     for (idx, doc) in docs.iter().enumerate() {
         let headings: Vec<String> = doc.toc.iter().map(|item| item.text.clone()).collect();
         let text = tomet_shelf_search::strip_html_to_plain_text(&doc.body_html);
-        let image = doc.icon_image_url.clone().or_else(|| doc.banner_url.clone());
+        let image = doc
+            .icon_image_url
+            .clone()
+            .or_else(|| doc.banner_url.clone());
 
         search_docs.push(tomet_shelf_search::SearchDocument {
             id: idx as u32,
@@ -184,7 +192,7 @@ pub fn build_wiki(
     let clean_url_prefix = full_url_prefix.as_str();
 
     // 4. Parse documents
-    let parsed: Vec<Result<(tomet::ast::Document, Option<String>), DocFailure>> = scanned
+    let parsed: Vec<Result<(tomet::ast::File, Option<String>), DocFailure>> = scanned
         .doc_files
         .par_iter()
         .map(|doc_file| {
@@ -250,7 +258,7 @@ pub fn build_wiki(
                 Some(&doc_file.abs_path),
                 &book_config,
                 &scanned.vault_index,
-                &scanned.workspace_config_blocks,
+                &scanned.workspace_config_declarations,
                 &unpublished,
                 Some(&route_table),
                 custom_element.clone(),

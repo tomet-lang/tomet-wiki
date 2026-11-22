@@ -402,10 +402,7 @@ search = "Search articles"
             config.cms.auth_endpoint.as_deref(),
             Some("https://auth.tomet.dev/oauth/callback")
         );
-        assert_eq!(
-            config.cms.site_domain.as_deref(),
-            Some("wiki.tomet.dev")
-        );
+        assert_eq!(config.cms.site_domain.as_deref(), Some("wiki.tomet.dev"));
         assert_eq!(
             config.cms.api_base_url.as_deref(),
             Some("https://api.github.com")

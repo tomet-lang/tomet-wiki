@@ -29,7 +29,10 @@ class AuthStore {
     }
   }
 
-  async verifyToken(token: string, apiBaseUrl = "https://api.github.com"): Promise<GitHubUser> {
+  async verifyToken(
+    token: string,
+    apiBaseUrl = "https://api.github.com",
+  ): Promise<GitHubUser> {
     this.loading = true;
     this.error = null;
     try {
@@ -40,7 +43,9 @@ class AuthStore {
         },
       });
       if (!res.ok) {
-        throw new Error(`Authentication failed (${res.status} ${res.statusText})`);
+        throw new Error(
+          `Authentication failed (${res.status} ${res.statusText})`,
+        );
       }
       const data = await res.json();
       const user: GitHubUser = {
@@ -90,7 +95,8 @@ class AuthStore {
 
       const endpoint =
         authEndpoint ||
-        (typeof window !== "undefined" && (window as any).tmtWikiCms?.authEndpoint) ||
+        (typeof window !== "undefined" &&
+          (window as any).tmtWikiCms?.authEndpoint) ||
         "https://auth.tomet.dev/github";
       const domain =
         siteDomain ||
@@ -109,7 +115,8 @@ class AuthStore {
 
       if (!popup) {
         this.loading = false;
-        this.error = "Popup blocked by browser. Please allow popups or use a PAT.";
+        this.error =
+          "Popup blocked by browser. Please allow popups or use a PAT.";
         return reject(new Error(this.error));
       }
 
@@ -147,7 +154,10 @@ class AuthStore {
         }
 
         // OAuth success
-        if (typeof e.data === "string" && e.data.startsWith("authorization:github:success:")) {
+        if (
+          typeof e.data === "string" &&
+          e.data.startsWith("authorization:github:success:")
+        ) {
           const jsonStr = e.data.slice("authorization:github:success:".length);
           try {
             const parsed = JSON.parse(jsonStr);
@@ -160,7 +170,10 @@ class AuthStore {
             handleToken(jsonStr);
           }
         } else if (e.data && typeof e.data === "object") {
-          if (e.data.type === "authorization:github:success" && (e.data.token || e.data.bearer)) {
+          if (
+            e.data.type === "authorization:github:success" &&
+            (e.data.token || e.data.bearer)
+          ) {
             handleToken(e.data.token || e.data.bearer);
           }
         }
@@ -170,7 +183,11 @@ class AuthStore {
 
       if (channel) {
         channel.onmessage = (e: MessageEvent) => {
-          if (e.data && typeof e.data === "object" && (e.data.token || e.data.bearer)) {
+          if (
+            e.data &&
+            typeof e.data === "object" &&
+            (e.data.token || e.data.bearer)
+          ) {
             handleToken(e.data.token || e.data.bearer);
           }
         };

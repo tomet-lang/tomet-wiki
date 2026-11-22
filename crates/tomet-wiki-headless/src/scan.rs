@@ -11,7 +11,7 @@ pub struct ScannedVault {
     pub media_files: Vec<MediaFileInfo>,
     pub vault_index: tomet::links::VaultLinkIndex,
     pub workspace_config_src: Option<String>,
-    pub workspace_config_blocks: Vec<tomet::ast::Block>,
+    pub workspace_config_declarations: Vec<tomet::ast::Declaration>,
     pub control_files: Vec<DocFileInfo>,
 }
 
@@ -79,19 +79,16 @@ pub fn scan_vault(src_dir: &Path, config: &WikiConfig) -> Result<ScannedVault> {
 
     let excludes = exclude_prefixes(config);
 
-    for entry in WalkDir::new(src_dir)
-        .into_iter()
-        .filter_entry(|e| {
-            if e.path() == src_dir {
-                return true;
-            }
-            let Ok(rel) = e.path().strip_prefix(src_dir) else {
-                return false;
-            };
-            let rel_str = normalize_path_str(&rel.to_string_lossy());
-            !is_ignored_rel(&rel_str, &excludes)
-        })
-    {
+    for entry in WalkDir::new(src_dir).into_iter().filter_entry(|e| {
+        if e.path() == src_dir {
+            return true;
+        }
+        let Ok(rel) = e.path().strip_prefix(src_dir) else {
+            return false;
+        };
+        let rel_str = normalize_path_str(&rel.to_string_lossy());
+        !is_ignored_rel(&rel_str, &excludes)
+    }) {
         let entry = entry?;
         if !entry.file_type().is_file() {
             continue;
@@ -137,15 +134,16 @@ pub fn scan_vault(src_dir: &Path, config: &WikiConfig) -> Result<ScannedVault> {
 
     let vault_index = tomet::links::VaultLinkIndex::from_paths(&all_rel_paths);
 
-    let workspace_cfg_src = [".writ.tmt", "default.config.tmt"]
-        .iter()
-        .map(|name| src_dir.join(name))
-        .find(|path| path.is_file())
-        .and_then(|path| std::fs::read_to_string(path).ok());
+    let workspace_cfg_path = src_dir.join("vault.config.tmt");
+    let workspace_cfg_src = if workspace_cfg_path.is_file() {
+        std::fs::read_to_string(&workspace_cfg_path).ok()
+    } else {
+        None
+    };
 
-    let workspace_config_blocks = workspace_cfg_src
+    let workspace_config_declarations = workspace_cfg_src
         .as_deref()
-        .map(tomet_shelf_document::extract_workspace_config_blocks)
+        .map(tomet_shelf_document::extract_workspace_config_declarations)
         .unwrap_or_default();
 
     Ok(ScannedVault {
@@ -153,7 +151,7 @@ pub fn scan_vault(src_dir: &Path, config: &WikiConfig) -> Result<ScannedVault> {
         media_files,
         vault_index,
         workspace_config_src: workspace_cfg_src,
-        workspace_config_blocks,
+        workspace_config_declarations,
         control_files,
     })
 }

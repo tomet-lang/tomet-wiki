@@ -1,20 +1,20 @@
 [package]
-name = "tomet-wiki"
+name              = "tomet-wiki"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Wiki system for the Tomet ecosystem."
-publish = false
+description       = "Wiki system for the Tomet ecosystem."
+publish           = false
 
 [[bin]]
 name = "tomet-wiki"
 path = "src/main.rs"
 
 [dependencies]
+anyhow                        = { workspace = true }
+clap                          = { workspace = true, features = ["derive"] }
+tokio                         = { workspace = true, features = ["full"] }
+tomet-wiki-assets.workspace   = true
 tomet-wiki-headless.workspace = true
-tomet-wiki-assets.workspace = true
-clap = { workspace = true, features = ["derive"] }
-anyhow = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing                       = { workspace = true }
+tracing-subscriber            = { workspace = true, features = ["env-filter"] }

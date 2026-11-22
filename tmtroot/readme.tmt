@@ -1,15 +1,13 @@
-::config(
-  export: {
-    type: commonmark,
-    path: "README.md"
-  }
+::id(doc-readme)
+::export(
+  type: commonmark
+  path: "README.md"
 )
-::meta{
-  id: doc-readme,
+::meta(
   lang: en
-}
+)
 
-${macro.generated_by(self.path)}
+$macro.generated_by(self::path)
 
 =[ Tomet Wiki ]
 
@@ -22,9 +20,9 @@ Wiki system for the Tomet ecosystem.
 ==[ Usage ]
 
 ```bash
-tomet-wiki init [dir] [--title <title>] [--owner <owner>] [--repo <repo>]
-tomet-wiki build [dir] [-d/--dest <dest>] [--strict] [--production]
-tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>] [--production]
+`` tomet-wiki init [dir] [--title <title>] [--owner <owner>] [--repo <repo>]
+`` tomet-wiki build [dir] [-d/--dest <dest>] [--strict] [--production]
+`` tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>] [--production]
 ```
 
 ==[ Configuration (`wiki.toml`) ]
@@ -32,23 +30,23 @@ tomet-wiki serve [dir] [-d/--dest <dest>] [--host <ip>] [-p/--port <port>] [--pr
 A `wiki.toml` configuration file in the vault root controls site generation and CMS authentication:
 
 ```toml
-[wiki]
-title = "My Wiki"
-lang = "ja"
-dest = "dist"
-
-[cms]
-owner = "my-org"
-repo = "my-wiki"
-branch = "main"
-path_prefix = "docs"
-auth_endpoint = "https://auth.tomet.dev/github"
-
-[build]
-url_prefix = "/wiki"
-exclude = [
-  "00-09 System/01 Apps"
-]
+`` [wiki]
+`` title = "My Wiki"
+`` lang = "ja"
+`` dest = "dist"
+``
+`` [cms]
+`` owner = "my-org"
+`` repo = "my-wiki"
+`` branch = "main"
+`` path_prefix = "docs"
+`` auth_endpoint = "https://auth.tomet.dev/github"
+``
+`` [build]
+`` url_prefix = "/wiki"
+`` exclude = [
+``   "00-09 System/01 Apps"
+`` ]
 ```
 
 ==[ Workspace Layout ]
@@ -71,15 +69,15 @@ exclude = [
 === Build workspace
 
 ```bash
-just build
+`` just build
 ```
 
 === Build Svelte 5 editor bundle
 
 ```bash
-just wasm          # build the editor's own WebAssembly (crates/tomet-wiki-wasm)
-just editor        # `just wasm`, then compile the Svelte 5 editor island via Deno into assets/
-just editor-check  # verify assets are up to date with sources
+`` just wasm          # build the editor's own WebAssembly (crates/tomet-wiki-wasm)
+`` just editor        # `just wasm`, then compile the Svelte 5 editor island via Deno into assets/
+`` just editor-check  # verify assets are up to date with sources
 ```
 
 The editor's WebAssembly is built here, not taken from a package: `tomet-wiki-wasm` carries the GitHub client and conflict functions of `tomet-cms-js` and its own `highlightSpans` (syntax colors from `tomet::highlight`, offsets in UTF-16 code units), and is inlined into `wiki-editor.js`. The dev shell provides the `wasm32-unknown-unknown` target and `wasm-bindgen`.
@@ -87,19 +85,19 @@ The editor's WebAssembly is built here, not taken from a package: `tomet-wiki-wa
 === Run tests
 
 ```bash
-just test
+`` just test
 ```
 
 === Check code
 
 ```bash
-just check
-just clippy
+`` just check
+`` just clippy
 ```
 
 === Documentation
 
 ```bash
-just docs        # regenerate Markdown from tmtroot/
-just docs-check  # verify docs match exports
+`` just docs        # regenerate Markdown from tmtroot/
+`` just docs-check  # verify docs match exports
 ```

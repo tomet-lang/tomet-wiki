@@ -1,36 +1,40 @@
 // Tomet Wiki client script
-(function() {
+(function () {
   function escapeHtml(str) {
-    if (!str) return '';
+    if (!str) return "";
     return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // 1. Theme toggle
-  const themeToggle = document.getElementById('tmt-wiki-theme-toggle');
+  const themeToggle = document.getElementById("tmt-wiki-theme-toggle");
   if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('tmt-wiki-theme', next);
+    themeToggle.addEventListener("click", () => {
+      const current =
+        document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("tmt-wiki-theme", next);
     });
   }
 
   // 2. Search trigger & key shortcut ("/")
-  const searchTrigger = document.getElementById('tmt-wiki-search-trigger');
+  const searchTrigger = document.getElementById("tmt-wiki-search-trigger");
   if (searchTrigger) {
-    searchTrigger.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('tmt:wiki:search'));
+    searchTrigger.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("tmt:wiki:search"));
     });
   }
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+  window.addEventListener("keydown", (e) => {
+    if (
+      e.key === "/" &&
+      !["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)
+    ) {
       e.preventDefault();
       searchTrigger?.click();
     }
@@ -38,46 +42,55 @@
 
   // 3. Edit & New Page button handlers: dynamically load & mount Svelte editor
   async function loadAndMountEditor(options) {
-    const root = document.getElementById('tmt-wiki-editor-root');
+    const root = document.getElementById("tmt-wiki-editor-root");
     if (!root) return;
 
     try {
       if (!window.__tmtWikiEditor) {
-        const basePath = window.tmtBasePath || '';
-        const scriptUrl = `${basePath}/wiki-editor.js`.replace(/\/+/g, '/');
+        const basePath = window.tmtBasePath || "";
+        const scriptUrl = `${basePath}/wiki-editor.js`.replace(/\/+/g, "/");
         await import(scriptUrl);
       }
       if (window.__tmtWikiEditor) {
         window.__tmtWikiEditor.open(root, options);
       }
     } catch (err) {
-      console.error('Failed to load wiki editor:', err);
+      console.error("Failed to load wiki editor:", err);
     }
   }
 
-  const editBtn = document.getElementById('tmt-wiki-edit-btn');
+  const editBtn = document.getElementById("tmt-wiki-edit-btn");
   if (editBtn) {
-    editBtn.addEventListener('click', () => {
-      const relPath = editBtn.getAttribute('data-rel-path') ||
-                      document.querySelector('main[data-tmt-rel-path]')?.getAttribute('data-tmt-rel-path');
-      window.dispatchEvent(new CustomEvent('tmt:wiki:edit', { detail: { relPath } }));
+    editBtn.addEventListener("click", () => {
+      const relPath =
+        editBtn.getAttribute("data-rel-path") ||
+        document
+          .querySelector("main[data-tmt-rel-path]")
+          ?.getAttribute("data-tmt-rel-path");
+      window.dispatchEvent(
+        new CustomEvent("tmt:wiki:edit", { detail: { relPath } }),
+      );
       loadAndMountEditor({ relPath, isNew: false });
     });
   }
 
-  const newBtn = document.getElementById('tmt-wiki-new-btn');
+  const newBtn = document.getElementById("tmt-wiki-new-btn");
   if (newBtn) {
-    newBtn.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('tmt:wiki:new'));
+    newBtn.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("tmt:wiki:new"));
       loadAndMountEditor({ isNew: true });
     });
   }
 
   // Hotkey: Ctrl+E / Cmd+E to edit page
-  window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'e' || e.key === 'E') && !e.shiftKey) {
+  window.addEventListener("keydown", (e) => {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (e.key === "e" || e.key === "E") &&
+      !e.shiftKey
+    ) {
       const tag = document.activeElement?.tagName;
-      if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+      if (tag !== "INPUT" && tag !== "TEXTAREA") {
         e.preventDefault();
         editBtn?.click();
       }
@@ -85,21 +98,22 @@
   });
 
   // 4. Header Authentication & User Menu
-  const authContainer = document.getElementById('tmt-wiki-auth-container');
+  const authContainer = document.getElementById("tmt-wiki-auth-container");
 
   function renderLoggedOut() {
     if (!authContainer) return;
-    authContainer.innerHTML = '<button type="button" class="tmt-wiki-btn" id="tmt-wiki-login-btn">Log in</button>';
-    const loginBtn = document.getElementById('tmt-wiki-login-btn');
-    loginBtn?.addEventListener('click', () => {
+    authContainer.innerHTML =
+      '<button type="button" class="tmt-wiki-btn" id="tmt-wiki-login-btn">Log in</button>';
+    const loginBtn = document.getElementById("tmt-wiki-login-btn");
+    loginBtn?.addEventListener("click", () => {
       startOAuthLogin();
     });
   }
 
   function renderLoggedIn(user) {
     if (!authContainer) return;
-    const avatarUrl = user?.avatar_url || '';
-    const login = user?.login || 'user';
+    const avatarUrl = user?.avatar_url || "";
+    const login = user?.login || "user";
     const name = user?.name || login;
 
     authContainer.innerHTML = `
@@ -121,14 +135,14 @@
       </div>
     `;
 
-    const userBtn = document.getElementById('tmt-wiki-user-btn');
-    const userMenu = document.getElementById('tmt-wiki-user-menu');
-    const logoutBtn = document.getElementById('tmt-wiki-logout-btn');
+    const userBtn = document.getElementById("tmt-wiki-user-btn");
+    const userMenu = document.getElementById("tmt-wiki-user-menu");
+    const logoutBtn = document.getElementById("tmt-wiki-logout-btn");
 
     function closeMenu() {
       if (userMenu && !userMenu.hidden) {
         userMenu.hidden = true;
-        userBtn?.setAttribute('aria-expanded', 'false');
+        userBtn?.setAttribute("aria-expanded", "false");
       }
     }
 
@@ -137,37 +151,37 @@
       if (!userMenu) return;
       const isHidden = userMenu.hidden;
       userMenu.hidden = !isHidden;
-      userBtn?.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      userBtn?.setAttribute("aria-expanded", isHidden ? "true" : "false");
     }
 
-    userBtn?.addEventListener('click', toggleMenu);
+    userBtn?.addEventListener("click", toggleMenu);
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
       if (!authContainer.contains(e.target)) {
         closeMenu();
       }
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
         closeMenu();
       }
     });
 
-    logoutBtn?.addEventListener('click', () => {
+    logoutBtn?.addEventListener("click", () => {
       logout();
     });
   }
 
   function logout() {
-    localStorage.removeItem('tmt_github_token');
-    localStorage.removeItem('tmt_github_user');
-    document.documentElement.removeAttribute('data-auth');
+    localStorage.removeItem("tmt_github_token");
+    localStorage.removeItem("tmt_github_user");
+    document.documentElement.removeAttribute("data-auth");
     renderLoggedOut();
     window.dispatchEvent(
-      new CustomEvent('tmt:auth:change', {
+      new CustomEvent("tmt:auth:change", {
         detail: { token: null, user: null, authenticated: false },
-      })
+      }),
     );
     if (window.__tmtWikiEditor?.close) {
       window.__tmtWikiEditor.close();
@@ -176,12 +190,12 @@
 
   async function verifyAndRender(token) {
     const cms = window.tmtWikiCms || {};
-    const apiBaseUrl = cms.apiBaseUrl || 'https://api.github.com';
+    const apiBaseUrl = cms.apiBaseUrl || "https://api.github.com";
     try {
       const res = await fetch(`${apiBaseUrl}/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github.v3+json',
+          Accept: "application/vnd.github.v3+json",
         },
       });
       if (res.ok) {
@@ -191,21 +205,21 @@
           avatar_url: data.avatar_url,
           name: data.name || data.login,
         };
-        localStorage.setItem('tmt_github_user', JSON.stringify(user));
+        localStorage.setItem("tmt_github_user", JSON.stringify(user));
         renderLoggedIn(user);
         return user;
       } else if (res.status === 401 || res.status === 403) {
         logout();
       }
     } catch (err) {
-      console.warn('Could not verify GitHub user:', err);
+      console.warn("Could not verify GitHub user:", err);
     }
     return null;
   }
 
   function startOAuthLogin() {
     const cms = window.tmtWikiCms || {};
-    const authEndpoint = cms.authEndpoint || 'https://auth.tomet.dev/github';
+    const authEndpoint = cms.authEndpoint || "https://auth.tomet.dev/github";
     const domain = cms.siteDomain || window.location.hostname;
     const url = `${authEndpoint}?site_id=${encodeURIComponent(domain)}`;
     const width = 600;
@@ -215,45 +229,48 @@
 
     const popup = window.open(
       url,
-      'tomet_oauth_popup',
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+      "tomet_oauth_popup",
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`,
     );
 
     if (!popup) {
-      alert('Popup blocked by browser. Please allow popups for this site.');
+      alert("Popup blocked by browser. Please allow popups for this site.");
       return;
     }
 
     let channel = null;
     try {
-      channel = new BroadcastChannel('tomet_auth');
+      channel = new BroadcastChannel("tomet_auth");
     } catch (e) {}
 
     function cleanup() {
-      window.removeEventListener('message', onMessage);
+      window.removeEventListener("message", onMessage);
       if (channel) channel.close();
       clearInterval(pollTimer);
     }
 
     async function onTokenReceived(token) {
       cleanup();
-      localStorage.setItem('tmt_github_token', token);
-      document.documentElement.setAttribute('data-auth', 'true');
+      localStorage.setItem("tmt_github_token", token);
+      document.documentElement.setAttribute("data-auth", "true");
       const user = await verifyAndRender(token);
       window.dispatchEvent(
-        new CustomEvent('tmt:auth:change', {
+        new CustomEvent("tmt:auth:change", {
           detail: { token, user, authenticated: true },
-        })
+        }),
       );
     }
 
     function onMessage(e) {
-      if (e.data === 'authorizing:github') {
-        popup?.postMessage('tomet:handshake', '*');
+      if (e.data === "authorizing:github") {
+        popup?.postMessage("tomet:handshake", "*");
         return;
       }
-      if (typeof e.data === 'string' && e.data.startsWith('authorization:github:success:')) {
-        const jsonStr = e.data.slice('authorization:github:success:'.length);
+      if (
+        typeof e.data === "string" &&
+        e.data.startsWith("authorization:github:success:")
+      ) {
+        const jsonStr = e.data.slice("authorization:github:success:".length);
         try {
           const parsed = JSON.parse(jsonStr);
           const token = parsed.token || parsed.bearer;
@@ -261,17 +278,24 @@
         } catch {
           onTokenReceived(jsonStr);
         }
-      } else if (e.data && typeof e.data === 'object') {
-        if (e.data.type === 'authorization:github:success' && (e.data.token || e.data.bearer)) {
+      } else if (e.data && typeof e.data === "object") {
+        if (
+          e.data.type === "authorization:github:success" &&
+          (e.data.token || e.data.bearer)
+        ) {
           onTokenReceived(e.data.token || e.data.bearer);
         }
       }
     }
 
-    window.addEventListener('message', onMessage);
+    window.addEventListener("message", onMessage);
     if (channel) {
       channel.onmessage = (e) => {
-        if (e.data && typeof e.data === 'object' && (e.data.token || e.data.bearer)) {
+        if (
+          e.data &&
+          typeof e.data === "object" &&
+          (e.data.token || e.data.bearer)
+        ) {
           onTokenReceived(e.data.token || e.data.bearer);
         }
       };
@@ -285,39 +309,40 @@
   }
 
   // Cross-component auth synchronization
-  window.addEventListener('tmt:auth:change', (e) => {
+  window.addEventListener("tmt:auth:change", (e) => {
     if (e.detail?.authenticated && e.detail.token) {
-      document.documentElement.setAttribute('data-auth', 'true');
+      document.documentElement.setAttribute("data-auth", "true");
       if (e.detail.user) {
         renderLoggedIn(e.detail.user);
       } else {
         verifyAndRender(e.detail.token);
       }
     } else if (e.detail && !e.detail.authenticated) {
-      document.documentElement.removeAttribute('data-auth');
+      document.documentElement.removeAttribute("data-auth");
       renderLoggedOut();
     }
   });
 
   // Initialize auth UI on page load
   if (authContainer) {
-    const token = localStorage.getItem('tmt_github_token');
+    const token = localStorage.getItem("tmt_github_token");
     if (token) {
-      document.documentElement.setAttribute('data-auth', 'true');
+      document.documentElement.setAttribute("data-auth", "true");
       let cachedUser = null;
       try {
-        const raw = localStorage.getItem('tmt_github_user');
+        const raw = localStorage.getItem("tmt_github_user");
         if (raw) cachedUser = JSON.parse(raw);
       } catch (e) {}
       if (cachedUser) {
         renderLoggedIn(cachedUser);
       } else {
         // Fallback placeholder while verifying
-        authContainer.innerHTML = '<div class="tmt-wiki-avatar-btn" style="opacity:0.5;background:var(--tmt-bg-subtle)"></div>';
+        authContainer.innerHTML =
+          '<div class="tmt-wiki-avatar-btn" style="opacity:0.5;background:var(--tmt-bg-subtle)"></div>';
       }
       verifyAndRender(token);
     } else {
-      document.documentElement.removeAttribute('data-auth');
+      document.documentElement.removeAttribute("data-auth");
       renderLoggedOut();
     }
   }
